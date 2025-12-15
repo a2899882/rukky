@@ -5,6 +5,23 @@ import lang from "@/locales";
 import React from "react";
 
 export default function AboutUs({aboutData, companyName, statsData}) {
+    const safeAboutData = aboutData || { aboutText: '', aboutCover: null };
+    const safeStatsData = statsData || {
+        param_one_name: null,
+        param_one_value: null,
+        param_two_name: null,
+        param_two_value: null,
+        param_three_name: null,
+        param_three_value: null,
+        param_four_name: null,
+        param_four_value: null,
+    };
+
+    const cover = safeAboutData.aboutCover;
+    const coverSrc = cover
+        ? `${process.env.NEXT_PUBLIC_BASE_URL}/upload/img/${cover}`
+        : null;
+
     return (
         <div className="py-16 bg-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,13 +33,15 @@ export default function AboutUs({aboutData, companyName, statsData}) {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                     {/* 左侧图片 */}
                     <div className="relative h-[300px] lg:h-full overflow-hidden">
-                        <Image
-                            src={`${process.env.NEXT_PUBLIC_BASE_URL}/upload/img/${aboutData.aboutCover}`}
-                            alt={companyName}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                        />
+                        {coverSrc ? (
+                            <Image
+                                src={coverSrc}
+                                alt={companyName || 'About'}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                            />
+                        ) : null}
                     </div>
 
                     {/* 右侧内容 */}
@@ -31,7 +50,7 @@ export default function AboutUs({aboutData, companyName, statsData}) {
                             {companyName}
                         </h3>
                         <p className="mb-6 text-gray-700"
-                           dangerouslySetInnerHTML={{__html: aboutData.aboutText}}>
+                           dangerouslySetInnerHTML={{__html: safeAboutData.aboutText || ''}}>
                         </p>
 
                         <Link href="/about"
@@ -47,21 +66,21 @@ export default function AboutUs({aboutData, companyName, statsData}) {
                 {/* 统计数据 */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 text-center">
                     <div className="p-6 bg-mainColorLight">
-                        <div className="text-4xl font-bold text-mainColorNormal mb-2">{statsData.param_one_value}</div>
-                        <div className="text-gray-700">{statsData.param_one_name}</div>
+                        <div className="text-4xl font-bold text-mainColorNormal mb-2">{safeStatsData.param_one_value}</div>
+                        <div className="text-gray-700">{safeStatsData.param_one_name}</div>
                     </div>
                     <div className="p-6 bg-mainColorLight">
-                        <div className="text-4xl font-bold text-mainColorNormal mb-2">{statsData.param_two_value}</div>
-                        <div className="text-gray-700">{statsData.param_two_name}</div>
+                        <div className="text-4xl font-bold text-mainColorNormal mb-2">{safeStatsData.param_two_value}</div>
+                        <div className="text-gray-700">{safeStatsData.param_two_name}</div>
                     </div>
                     <div className="p-6 bg-mainColorLight">
                         <div
-                            className="text-4xl font-bold text-mainColorNormal mb-2">{statsData.param_three_value}</div>
-                        <div className="text-gray-700">{statsData.param_three_name}</div>
+                            className="text-4xl font-bold text-mainColorNormal mb-2">{safeStatsData.param_three_value}</div>
+                        <div className="text-gray-700">{safeStatsData.param_three_name}</div>
                     </div>
                     <div className="p-6 bg-mainColorLight">
-                        <div className="text-4xl font-bold text-mainColorNormal mb-2">{statsData.param_four_value}</div>
-                        <div className="text-gray-700">{statsData.param_four_name}</div>
+                        <div className="text-4xl font-bold text-mainColorNormal mb-2">{safeStatsData.param_four_value}</div>
+                        <div className="text-gray-700">{safeStatsData.param_four_name}</div>
                     </div>
                 </div>
             </div>

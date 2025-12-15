@@ -8,24 +8,36 @@ import TipBar from "@/components/index/sections/tipbar";
 import SwitchLangB from "@/components/index/sections/switchLangB";
 
 export default function IndexLayoutTemplate({navSectionData, footerSectionData, children}) {
+    const safeNavSectionData = navSectionData || {
+        basicSite: {},
+        basicGlobal: {},
+        navigationItems: [],
+    };
+
+    const safeFooterSectionData = footerSectionData || {
+        navData: [],
+        categoryData: [],
+        contactData: {},
+    };
+
     return (
         <>
             <div className="flex flex-col min-h-screen">
-                <NavBar sectionData={navSectionData}/>
+                <NavBar sectionData={safeNavSectionData}/>
                 <main className="flex-grow">
                     {children}
                 </main>
-                <Footer sectionData={footerSectionData}/>
+                <Footer sectionData={safeFooterSectionData}/>
                 <ScrollBar/>
                 <SendMessage />
-                <TipBar sectionData={navSectionData}/>
+                <TipBar sectionData={safeNavSectionData}/>
             </div>
 
             {/* 语言切换器  */}
             {/*<SwitchLangB/>*/}
 
             {/*谷歌分析*/}
-            <GoogleAnalytics gaId={navSectionData.basicSite.site_gaid} />
+            <GoogleAnalytics gaId={safeNavSectionData?.basicSite?.site_gaid || null} />
         </>
     );
 }

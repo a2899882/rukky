@@ -3,6 +3,11 @@ import lang from "@/locales"
 
 export default function Footer({sectionData}) {
 
+    const safeSectionData = sectionData || {};
+    const navData = Array.isArray(safeSectionData.navData) ? safeSectionData.navData : [];
+    const categoryData = Array.isArray(safeSectionData.categoryData) ? safeSectionData.categoryData : [];
+    const contactData = safeSectionData.contactData || {};
+
     return (
         <div className="bg-mainColorLight">
             {/* Footer */}
@@ -14,7 +19,7 @@ export default function Footer({sectionData}) {
                                 {lang.QuickLinks}
                             </h3>
                             <ul className="space-y-2">
-                                {sectionData.navData.map((item) => (
+                                {navData.map((item) => (
                                     <li key={item.name}>
                                         <Link href={item.href}
                                               className="text-gray-600 hover:text-mainColorNormal transition-colors flex items-center justify-center md:justify-start">
@@ -33,7 +38,7 @@ export default function Footer({sectionData}) {
                                 {lang.ProductCategories}
                             </h3>
                             <ul className="space-y-2">
-                                {sectionData.categoryData.map((item) => (
+                                {categoryData.map((item) => (
                                     <li key={item.id}>
                                         <Link href={'/product/category/' + item.id}
                                               className="text-gray-600 hover:text-mainColorNormal transition-colors flex items-center justify-center md:justify-start">
@@ -59,7 +64,7 @@ export default function Footer({sectionData}) {
                                                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                         </svg>
                                     </div>
-                                    <span className="text-gray-600">{sectionData.contactData.global_email}</span>
+                                    <span className="text-gray-600">{contactData.global_email}</span>
                                 </li>
                                 <li className="flex items-start justify-center md:justify-start">
                                     <div className="text-mainColorNormal mr-2 mt-1">
@@ -69,7 +74,7 @@ export default function Footer({sectionData}) {
                                                   d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                                         </svg>
                                     </div>
-                                    <span className="text-gray-600">{sectionData.contactData.global_phone}</span>
+                                    <span className="text-gray-600">{contactData.global_phone}</span>
                                 </li>
                                 <li className="flex items-start justify-center md:justify-start">
                                     <div className="text-mainColorNormal mr-2 mt-1">
@@ -81,7 +86,7 @@ export default function Footer({sectionData}) {
                                                   d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
                                     </div>
-                                    <span className="text-gray-600">{sectionData.contactData.global_address}</span>
+                                    <span className="text-gray-600">{contactData.global_address}</span>
                                 </li>
                             </ul>
                         </div>
@@ -91,12 +96,12 @@ export default function Footer({sectionData}) {
                     <div
                         className="flex flex-col sm:flex-row justify-between items-center border-t border-gray-400 pt-8">
                         <div className="flex flex-col text-sm text-gray-500 mb-4 sm:mb-0">
-                            <p>Copyright &copy; {new Date().getFullYear()} {sectionData.contactData.global_company_name}
+                            <p>Copyright &copy; {new Date().getFullYear()} {contactData.global_company_name}
                             </p>
                         </div>
                         <div className="flex flex-wrap justify-center space-x-4">
-                            {sectionData.contactData.global_facebook?.length > 0 && (
-                                <Link href={sectionData.contactData.global_facebook}
+                            {contactData.global_facebook?.length > 0 && (
+                                <Link href={contactData.global_facebook}
                                       target="_blank"
                                       className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -108,8 +113,8 @@ export default function Footer({sectionData}) {
                                     </svg>
                                 </Link>
                             )}
-                            {sectionData.contactData.global_instagram?.length > 0 && (
-                                <Link href={sectionData.contactData.global_instagram}
+                            {contactData.global_instagram?.length > 0 && (
+                                <Link href={contactData.global_instagram}
                                       target="_blank"
                                       className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -121,8 +126,8 @@ export default function Footer({sectionData}) {
                                     </svg>
                                 </Link>
                             )}
-                            {sectionData.contactData.global_twitter?.length > 0 && (
-                                <Link href={sectionData.contactData.global_twitter}
+                            {contactData.global_twitter?.length > 0 && (
+                                <Link href={contactData.global_twitter}
                                       target="_blank"
                                       className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -132,8 +137,8 @@ export default function Footer({sectionData}) {
                                     </svg>
                                 </Link>
                             )}
-                            {sectionData.contactData.global_linkedin?.length > 0 && (
-                                <Link href={sectionData.contactData.global_linkedin}
+                            {contactData.global_linkedin?.length > 0 && (
+                                <Link href={contactData.global_linkedin}
                                       target="_blank"
                                       className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -143,8 +148,8 @@ export default function Footer({sectionData}) {
                                     </svg>
                                 </Link>
                             )}
-                            {sectionData.contactData.global_youtube?.length > 0 && (
-                                <Link href={sectionData.contactData.global_youtube}
+                            {contactData.global_youtube?.length > 0 && (
+                                <Link href={contactData.global_youtube}
                                       target="_blank"
                                       className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -154,8 +159,8 @@ export default function Footer({sectionData}) {
                                     </svg>
                                 </Link>
                             )}
-                            {sectionData.contactData.global_whatsapp?.length > 0 && (
-                                <Link href={sectionData.contactData.global_whatsapp}
+                            {contactData.global_whatsapp?.length > 0 && (
+                                <Link href={contactData.global_whatsapp}
                                       target="_blank"
                                       className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
