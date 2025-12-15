@@ -219,7 +219,10 @@ class BasicSite(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and BasicSite.objects.exists():
@@ -262,7 +265,10 @@ class BasicTdk(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and BasicTdk.objects.exists():
@@ -289,7 +295,10 @@ class BasicBanner(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and BasicBanner.objects.exists():
@@ -320,7 +329,10 @@ class BasicGlobal(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and BasicGlobal.objects.exists():
@@ -359,7 +371,10 @@ class BasicAdditional(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and BasicAdditional.objects.exists():
@@ -401,7 +416,10 @@ class About(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and About.objects.exists():
@@ -431,7 +449,10 @@ class ShopSettings(models.Model):
         try:
             return cls.objects.get()
         except ObjectDoesNotExist:
-            return None
+            obj = cls.objects.first()
+            if obj is not None:
+                return obj
+            return cls.objects.create()
 
     def save(self, *args, **kwargs):
         if not self.pk and ShopSettings.objects.exists():
