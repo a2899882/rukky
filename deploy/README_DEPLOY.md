@@ -1,4 +1,4 @@
-# 部署说明（Debian 13 + Docker + FinalShell）
+# 部署说明（Debian 12/13 + Docker + FinalShell）
 
 ## 1. 服务器准备
 
@@ -67,6 +67,12 @@ nano .env
 bash deploy/deploy.sh
 ```
 
+可选：临时指定本次部署域名（不修改 .env）：
+
+```bash
+bash deploy/deploy.sh --host 你的域名
+```
+
 说明：脚本会检查关键环境变量（如 `DJANGO_SECRET_KEY`、`MYSQL_ROOT_PASSWORD`）是否已修改，并在启动后等待 `db` healthcheck 变为 healthy，再输出访问地址。
 
 访问：
@@ -82,11 +88,11 @@ bash deploy/deploy.sh
 ### A. 容器健康
 
 ```bash
-docker compose ps
-docker compose logs -f --tail=200 db
-docker compose logs -f --tail=200 api
-docker compose logs -f --tail=200 web
-docker compose logs -f --tail=200 nginx
+docker compose ps    # 如果你的系统只有 docker-compose，则使用：docker-compose ps
+docker compose logs -f --tail=200 db    # 或 docker-compose logs -f --tail=200 db
+docker compose logs -f --tail=200 api   # 或 docker-compose logs -f --tail=200 api
+docker compose logs -f --tail=200 web   # 或 docker-compose logs -f --tail=200 web
+docker compose logs -f --tail=200 nginx # 或 docker-compose logs -f --tail=200 nginx
 ```
 
 确认：
@@ -125,7 +131,7 @@ docker compose logs -f --tail=200 nginx
 ## 5. 查看日志
 
 ```bash
-docker compose logs -f --tail=200 nginx
+docker compose logs -f --tail=200 nginx   # 或 docker-compose ...
 docker compose logs -f --tail=200 web
 docker compose logs -f --tail=200 api
 ```
@@ -159,4 +165,10 @@ RESTORE_FORCE=1 bash deploy/restore.sh backups/<timestamp>
 
 ```bash
 bash deploy/update.sh
+```
+
+可选：临时指定本次更新域名（不修改 .env）：
+
+```bash
+bash deploy/update.sh --host 你的域名
 ```

@@ -4,7 +4,7 @@ import os
 import requests
 import stripe
 from django.db import transaction
-from django.conf import settings
+from django.conf import settings as django_settings
 from rest_framework.decorators import api_view
 
 from myapp.handler import APIResponse
@@ -12,7 +12,7 @@ from myapp.models import Order, Payment, ShopSettings, OrderItem, Thing, ThingSk
 
 
 def _public_base_url():
-    public_base = os.getenv('PUBLIC_BASE_URL') or getattr(settings, 'BASE_HOST_URL', '').rstrip('/')
+    public_base = os.getenv('PUBLIC_BASE_URL') or getattr(django_settings, 'BASE_HOST_URL', '').rstrip('/')
     return (public_base or '').rstrip('/')
 
 

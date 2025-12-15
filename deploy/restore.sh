@@ -4,6 +4,16 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+COMPOSE=""
+if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+  COMPOSE="docker compose"
+elif command -v docker-compose >/dev/null 2>&1; then
+  COMPOSE="docker-compose"
+else
+  echo "ERROR: docker compose / docker-compose not found. Please install Docker and Compose."
+  exit 1
+fi
+
 if [ $# -ne 1 ]; then
   echo "Usage: bash deploy/restore.sh <backup_dir>"
   echo "Example: bash deploy/restore.sh backups/2025-12-13_120000"
@@ -43,7 +53,7 @@ fi
 source .env
 
 echo "Restoring database $DB_NAME ..."
-cat "$BACKUP_DIR/db.sql" | docker compose exec -T db mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$DB_NAME"
+cat "$BACKUP_DIR/db.sql" | $COMPOSE exec -T db mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$DB_NAME"
 
 echo "Restoring upload directory..."
 if [ "${RESTORE_FORCE:-0}" != "1" ]; then
@@ -61,4 +71,4 @@ fi
 tar -xzf "$BACKUP_DIR/upload.tar.gz" -C "$ROOT_DIR/server"
 
 echo "Done. Restarting containers..."
-docker compose up -d
+$COMPOSE up -d

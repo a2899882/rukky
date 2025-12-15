@@ -106,7 +106,7 @@ urlpatterns = [
     # 电商（shop）
     path('shop/order/create', views.shop.order.create),
     path('shop/order/query', views.shop.order.query),
-    path('shop/settings', views.shop.settings.get_settings),
+    path('shop/settings', views.shop.get_settings),
     path('shop/pay/stripe/createSession', views.shop.payment.stripe_create_session),
     path('shop/pay/stripe/confirm', views.shop.payment.stripe_confirm),
     path('shop/pay/stripe/webhook', views.shop.payment.stripe_webhook),
