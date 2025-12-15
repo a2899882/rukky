@@ -40,10 +40,7 @@ const nextConfig = {
             },
         ];
     },
-    env: {
-        NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: "da9h8exvs",
-        NEXT_PUBLIC_CLOUDINARY_PRESET_NAME: "fi0lxkc1",
-    },
+    env: {},
     images: {
         domains: imageDomains,
     },

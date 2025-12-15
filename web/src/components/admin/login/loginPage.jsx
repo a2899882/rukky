@@ -15,23 +15,8 @@ const LoginPage = () => {
         password: ""
     });
 
-    const [wechat, setWechat] = useState("");
-
     useEffect(() => {
         setYear(new Date().getFullYear());
-        getInfo();
-        
-        // 检查当前域名
-        if (typeof window !== 'undefined') {
-            const currentHost = window.location.hostname;
-            // 如果域名包含fktool.com
-            if (currentHost.includes('fktool.com')) {
-                setCurrentItem({
-                    username: "test",
-                    password: "test"
-                });
-            }
-        }
     }, []);
 
     const handleInputChange = (name, value) => {
@@ -63,20 +48,6 @@ const LoginPage = () => {
             console.log(err)
             message.error(err.detail || '网络异常')
             setLoading(false)
-        }
-    }
-
-    const getInfo = async () => {
-        try {
-            const post_url = '/myapp/admin/basicGlobal/listInfo';
-            const {code, msg, data} = await axiosInstance.get(post_url);
-            console.log(data)
-            if(code === 0){
-                setWechat(data.global_wechat);
-            }
-        } catch (err) {
-            console.log(err)
-            message.error(err.detail || '网络异常')
         }
     }
 
@@ -179,7 +150,6 @@ const LoginPage = () => {
                 <div className="mt-4 sm:mt-6 text-center text-gray-500 text-xs">
                     <p>安全连接 | 管理员专用入口</p>
                     <p className="mt-1">© {year} 企业内容管理系统. 保留所有权利</p>
-                    <p className="mt-1">技术支持微信: {wechat}</p>
                 </div>
             </div>
         </div>

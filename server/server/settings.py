@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-sz@madp0ifx!b)^lg_g!f+5s*w7w_=sjgq-k+erzb%x42$^r!d')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', '1') == '1'
@@ -45,7 +45,7 @@ LOGGING = {
 }
 
 
-_allowed_hosts = os.getenv('DJANGO_ALLOWED_HOSTS', 'mytest.com,127.0.0.1')
+_allowed_hosts = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1')
 ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',') if h.strip()]
 
 # Application definition
@@ -185,9 +185,9 @@ CDN_FILE_UPLOAD_SIZE = 500 * 1024 * 1024
 
 # smtp设置
 SMTP_SERVER = os.getenv('SMTP_SERVER', 'smtp.qq.com')
-SENDER_EMAIL = os.getenv('SENDER_EMAIL', '285126081@qq.com')
-SENDER_PASS = os.getenv('SENDER_PASS', 'xxxxxxxxxxxxxxxxxxxxx')
+SENDER_EMAIL = os.getenv('SENDER_EMAIL', 'you@example.com')
+SENDER_PASS = os.getenv('SENDER_PASS', 'change-me')
 
 # 域名
 # BASE_HOST_URL = 'http://127.0.0.1:8000'
-BASE_HOST_URL = os.getenv('DJANGO_BASE_HOST_URL', 'http://mytest.com')
+BASE_HOST_URL = os.getenv('DJANGO_BASE_HOST_URL', 'http://localhost')

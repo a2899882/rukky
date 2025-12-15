@@ -13,8 +13,8 @@ def send_email(
         content,
         smtp_server='smtp.qq.com',
         port=465,
-        sender_email='285126081@qq.com',
-        sender_pass='your_password_or_app_code'
+        sender_email='you@example.com',
+        sender_pass='change-me'
 ):
     """
     发送邮件的通用方法
@@ -53,10 +53,10 @@ def send_email(
 if __name__ == "__main__":
     send_email(
         subject="测试邮件",
-        receivers="843863636@qq.com",  # 可以是字符串或者列表
+        receivers="you@example.com",  # 可以是字符串或者列表
         content="您好，<p>这是测试邮件</p>",
         smtp_server="smtp.qq.com",  # QQ邮箱smtp地址
         port=465,
-        sender_email="285126081@qq.com",
-        sender_pass="xxxxxxxxxxxxxxxxxxxxxxxxxx"
+        sender_email="you@example.com",
+        sender_pass="change-me"
     )

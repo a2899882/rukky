@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 
-url = "http://mytest.com"  # 替换为你想访问的网址
+url = "http://localhost"  # 替换为你想访问的网址
 
 with sync_playwright() as p:
     # browser = p.chromium.launch(headless=False)  # headless=False 即为有头模式

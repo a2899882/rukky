@@ -133,8 +133,8 @@ def send_email(
         content,
         smtp_server='smtp.qq.com',
         port=465,
-        sender_email='285126081@qq.com',
-        sender_pass='your_password_or_app_code'
+        sender_email='you@example.com',
+        sender_pass='change-me'
 ):
     """
     发送邮件的通用方法

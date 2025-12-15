@@ -93,10 +93,6 @@ export default function Footer({sectionData}) {
                         <div className="flex flex-col text-sm text-gray-500 mb-4 sm:mb-0">
                             <p>Copyright &copy; {new Date().getFullYear()} {sectionData.contactData.global_company_name}
                             </p>
-                            <p className="mt-1">Powered by <a href="https://fktool.com" target="_blank"
-                                                              rel="noopener noreferrer"
-                                                              className="text-gray-500 hover:text-mainColorDeep">FK</a>
-                            </p>
                         </div>
                         <div className="flex flex-wrap justify-center space-x-4">
                             {sectionData.contactData.global_facebook?.length > 0 && (

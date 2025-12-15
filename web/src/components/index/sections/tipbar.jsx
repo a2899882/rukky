@@ -24,13 +24,5 @@ export default function TipBar({sectionData}) {
         setShow(hasDemo);
     }, []);
 
-    if(show){
-        return (
-            <div className="fixed left-6 bottom-6 z-50 p-1.5 bg-gray-900 text-white shadow-md rounded-sm">
-                建站微信: <span className="font-bold">{sectionData['basicGlobal']['global_wechat']}</span>
-            </div>
-        )
-    }else {
-        return null
-    }
+    return null
 }

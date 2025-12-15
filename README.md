@@ -6,7 +6,7 @@
 
 ## 在线演示
 
-演示地址：[https://010.fktool.com](https://010.fktool.com)
+演示地址：[https://boutiquemark.shop](https://boutiquemark.shop)
 
 
 ## 开发环境
@@ -26,193 +26,34 @@
 
 ## 运行步骤
 
-## Docker 部署（Debian 13）
+### Docker 部署（推荐）
 
 参考：`deploy/README_DEPLOY.md`
 
-## 上线验收 Checklist（建议首次部署必做）
+### 上线验收 Checklist（建议首次部署必做）
 
 - **[服务健康]** `db/api/web/nginx` 容器均为 running，且 db healthcheck 通过
 - **[后台可登录]** `/panelLogin` 使用 `.env` 中初始化的管理员账号可登录
 - **[媒体上传]** 后台媒体库可上传图片/视频，前台能访问 `/upload/...`
 - **[下单闭环]** 前台下单 -> 支付（sandbox）-> 回跳确认 -> 后台订单可“标记发货/完成”
 - **[SEO]** `/robots.txt` 和 `/sitemap.xml` 可访问
-- **[支付配置]** 收款上线前确认 `PUBLIC_BASE_URL` 为 `https://你的域名`，并按支付平台要求配置 Webhook
+- **[支付配置]** 收款上线前确认 `PUBLIC_BASE_URL` 为 `https://boutiquemark.shop`，并按支付平台要求配置 Webhook
 
-## 电商功能（本仓库已集成）
+### 本地开发（可选）
 
-### 前台
+- 前端：进入 `web/`，安装依赖并启动
 
-- 购物车：`/cart`
-- 结账：`/checkout`
-- 订单查询：`/order/query`（使用创建订单返回的 `orderNo + token`）
+```
+npm install
+npm run dev
+```
 
-### 支付
+- 后端：进入 `server/`，安装依赖并启动
 
-- Stripe：Checkout + 回跳确认 + Webhook（需要配置环境变量）
-- PayPal：Create Order + Capture（需要配置环境变量）
-
-### 后台
-
-- 后台入口：`/panel`
-- 订单管理：`/panel/orders`
-- 支付记录：`/panel/payments`
-- 支付设置（WooCommerce 风格开关+测试）：`/panel/pay-settings`
-- 媒体库（批量上传/复制链接/删除）：`/panel/media`
-- 新手引导 Checklist：`/panel/onboarding`
-
-### 商品能力增强
-
-- 支持商品主视频：后台产品编辑可选择一个视频文件（media/file），前台详情页自动展示播放器。
-
-### 多语言
-
-前台语言通过页面上的语言切换按钮切换（会写入浏览器 `localStorage` 的 `lang`，刷新生效）。
-
-### 软件准备
-
-1. Python 3.8 [下载地址](https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe)
-2. MySQL 5.7 [下载地址](https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-community-5.7.44.0.msi)
-3. Node [下载地址](https://nodejs.org/dist/v18.20.2/node-v18.20.2-x64.msi)
-
-### 后端运行步骤
-
-(1) 安装依赖，cd进入server目录下，执行
 ```
 pip install -r requirements.txt
-```
-
-(2) 创建数据库，创建SQL如下：
-```
-CREATE DATABASE IF NOT EXISTS python_db[your dbname] DEFAULT CHARSET utf8 COLLATE utf8_general_ci
-```
-(3) 恢复数据库数据。在mysql下依次执行如下命令：
-
-```
-mysql> use xxx(数据库名);
-mysql> source D:/xxx/xxx/xxx.sql;
-```
-
-(4) 配置数据库。在server目录下的server下的settings.py中配置您的数据库账号密码
-
-```
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'python_db',   # 您的数据库
-        'USER': 'root',        # 您的用户名
-        'PASSWORD': 'xxxxx', # 您的密码
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-        'OPTIONS': {
-            "init_command": "SET foreign_key_checks = 0;",
-        }
-    }
-}
-```
-
-(5) 启动django服务。在server目录下执行：
-```
 python manage.py runserver
 ```
-
-### 前端运行步骤
-
-(1) 安装依赖，cd到web目录，执行:
-```
-npm install 
-```
-(2) 修改.env配置
-
-修改.env文件中的域名，改成你自己的域名。
-
-(3) 构建项目
-```
-npm run build
-```
-(4) 运行
-```
-npm run start
-```
-
-### nginx配置
-
-```
-server {
-    listen       80;
-    server_name  xxxxx.com www.xxxxx.com;
-
-
-    location /upload/ {
-        access_log off;
-        log_not_found off;
-        alias /var/xxxxx/server/upload/;
-        add_header Cache-Control "public, max-age=90";
-    }
-     
-    # ico文件
-    location /favicon.ico {
-        access_log off;
-        log_not_found off;
-        alias /var/xxxxx/server/upload/img/favicon.ico;
-        add_header Cache-Control "public, max-age=90";
-    }
-
-    # django代理
-    location /myapp/ {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-	proxy_set_header X-Real-IP $remote_addr; # 获取客户端真实 IP
-	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # 获取代理链中的真实 IP
-	proxy_set_header X-Forwarded-Proto $scheme; # 获取协议（http 或 https）
-	client_max_body_size 100M; # 上传限制
-
-    }
-
-    location /_next/image {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        add_header Cache-Control "public, max-age=31536000";
-    }
-
-    location /_next/static {
-        proxy_pass http://127.0.0.1:3000;
-        access_log off;
-        expires 1y;
-        add_header Cache-Control "public, max-age=31536000, immutable";
-    }
-
-    # 开发环境hmr
-    location /_next/webpack-hmr {
-	    proxy_pass http://127.0.0.1:3000;
-	    proxy_http_version 1.1;
-	    proxy_set_header Upgrade $http_upgrade;
-	    proxy_set_header Connection "upgrade";
-	    proxy_set_header Host $host;
-	    proxy_cache_bypass $http_upgrade;
-    }
-
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-```
-
-
-
-
-
-## 付费咨询
-
-微信（Lengqin1024）
 
 
 ## 常见问题

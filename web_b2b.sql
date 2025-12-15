@@ -345,7 +345,7 @@ CREATE TABLE `b_basic_global`  (
 -- ----------------------------
 -- Records of b_basic_global
 -- ----------------------------
-INSERT INTO `b_basic_global` VALUES (1, '+86-17801460534', 'kefu308@gmail.com', 'Blueheart Technology of Zhejiang  Ltd.', 'No. 2875 Beichen West Road, Shaoxing, Zhejiang, China', 'lengqin1024', 'https://facebook.com/java1024', 'https://twitter.com/hello', 'https://linkedin.com/in/java1024', 'https://wa.me/1234567890', 'https://youtube.com/', 'https://instagram.com/', '1746598578851.jpg');
+INSERT INTO `b_basic_global` VALUES (1, '', '', '', '', '', '', '', '', '', '', '', NULL);
 
 -- ----------------------------
 -- Table structure for b_basic_site

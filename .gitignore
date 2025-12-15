@@ -5,6 +5,9 @@ backups/
 server/upload/
 server/**/__pycache__/
 server/**/*.pyc
+server/**/*.log
+server/info.log
+*.log
 
 # Next.js
 web/node_modules/
