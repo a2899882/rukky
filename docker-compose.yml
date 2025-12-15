@@ -1,0 +1,81 @@
+services:
+  db:
+    image: mysql:8.0
+    command: >-
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: ./server
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
+      DJANGO_BASE_HOST_URL: ${DJANGO_BASE_HOST_URL}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      SMTP_SERVER: ${SMTP_SERVER}
+      SENDER_EMAIL: ${SENDER_EMAIL}
+      SENDER_PASS: ${SENDER_PASS}
+      GUNICORN_WORKERS: ${GUNICORN_WORKERS}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      PAYPAL_ENV: ${PAYPAL_ENV}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+      AUTO_INIT_ADMIN: ${AUTO_INIT_ADMIN}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./server/upload:/app/upload
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_HOST: ${SITE_HOST}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
+        NEXT_PUBLIC_DJANGO_BASE_URL: ${NEXT_PUBLIC_DJANGO_BASE_URL}
+        NEXT_PUBLIC_TEMPLATE_ID: ${NEXT_PUBLIC_TEMPLATE_ID}
+        NEXT_PUBLIC_ADMIN_BASE_PATH: ${NEXT_PUBLIC_ADMIN_BASE_PATH}
+    environment:
+      NEXT_PUBLIC_ADMIN_BASE_PATH: ${NEXT_PUBLIC_ADMIN_BASE_PATH}
+      NEXT_PUBLIC_DEFAULT_CURRENCY: ${NEXT_PUBLIC_DEFAULT_CURRENCY}
+      NEXT_PUBLIC_SHIPPING_FEE: ${NEXT_PUBLIC_SHIPPING_FEE}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
+      NEXT_PUBLIC_DJANGO_BASE_URL: ${NEXT_PUBLIC_DJANGO_BASE_URL}
+    depends_on:
+      - api
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./server/upload:/var/www/upload:ro
+    depends_on:
+      - web
+      - api
+
+volumes:
+  db_data:

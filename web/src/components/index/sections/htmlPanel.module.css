@@ -1,0 +1,78 @@
+.editor-content-view {
+    margin-top: 20px;
+    overflow-x: auto;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+}
+
+.editor-content-view p {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    unicode-bidi: isolate;
+}
+
+.editor-content-view li {
+    white-space: pre-wrap; /* 保留空格 */
+    display: list-item;
+    text-align: -webkit-match-parent;
+    unicode-bidi: isolate;
+    margin-block-start: 0.6em;
+    margin-block-end: 0.6em;
+}
+
+.editor-content-view blockquote {
+    border-left: 8px solid #d0e5f2;
+    padding: 10px 10px;
+    margin: 10px 0;
+    background-color: #f1f1f1;
+}
+
+.editor-content-view code {
+    font-family: monospace;
+    background-color: #eee;
+    padding: 3px;
+    border-radius: 3px;
+}
+.editor-content-view pre>code {
+    display: block;
+    padding: 10px;
+}
+
+.editor-content-view table {
+    border-collapse: collapse;
+}
+.editor-content-view td,
+.editor-content-view th {
+    border: 1px solid #ccc;
+    min-width: 50px;
+    height: 20px;
+}
+.editor-content-view th {
+    background-color: #f1f1f1;
+}
+
+.editor-content-view ul{
+    padding-left: 20px;
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    unicode-bidi: isolate;
+}
+
+.editor-content-view ol {
+    padding-left: 20px;
+    display: block;
+    list-style-type: decimal;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    unicode-bidi: isolate;
+}
+
+
+.editor-content-view input[type="checkbox"] {
+    margin-right: 5px;
+}
