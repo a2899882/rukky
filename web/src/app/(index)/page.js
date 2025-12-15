@@ -4,7 +4,29 @@ import {headers} from "next/headers";
 import {getIp} from "@/utils/tools";
 
 export default async function Home() {
-    const sectionData = await getSectionDataCached();
+    const sectionData = (await getSectionDataCached()) || {
+        seoData: { seo_title: null, seo_description: null, seo_keywords: null },
+        bannerData: null,
+        featuredData: [],
+        categoryData: [],
+        aboutData: { aboutText: null, aboutCover: null },
+        companyName: null,
+        siteName: null,
+        statsData: {
+            param_one_name: null,
+            param_one_value: null,
+            param_two_name: null,
+            param_two_value: null,
+            param_three_name: null,
+            param_three_value: null,
+            param_four_name: null,
+            param_four_value: null,
+        },
+        commentData: [],
+        newsData: [],
+        heroText: null,
+        contactData: null,
+    };
 
     // 获取模板id
     const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
@@ -32,10 +54,13 @@ export default async function Home() {
 
 export async function generateMetadata({params}) {
     // 使用缓存的函数获取案例详情数据
-    const data = await getSectionDataCached();
+    const data = (await getSectionDataCached()) || {
+        seoData: { seo_title: null, seo_description: null, seo_keywords: null },
+        siteName: null,
+    };
 
     // 从详情数据中提取信息
-    const {seo_title, seo_description, seo_keywords} = data.seoData;
+    const {seo_title, seo_description, seo_keywords} = data.seoData || {};
     const siteName = data.siteName;
 
     // 返回动态生成的metadata
@@ -77,10 +102,54 @@ const getSectionDataCached = cache(async () => {
             return data;
         } else {
             console.error(`获取数据错误: ${msg}`);
-            return null;
+            return {
+                seoData: { seo_title: null, seo_description: null, seo_keywords: null },
+                bannerData: null,
+                featuredData: [],
+                categoryData: [],
+                aboutData: { aboutText: null, aboutCover: null },
+                companyName: null,
+                siteName: null,
+                statsData: {
+                    param_one_name: null,
+                    param_one_value: null,
+                    param_two_name: null,
+                    param_two_value: null,
+                    param_three_name: null,
+                    param_three_value: null,
+                    param_four_name: null,
+                    param_four_value: null,
+                },
+                commentData: [],
+                newsData: [],
+                heroText: null,
+                contactData: null,
+            };
         }
     } catch (err) {
         console.error("获取数据失败:", err);
-        return null;
+        return {
+            seoData: { seo_title: null, seo_description: null, seo_keywords: null },
+            bannerData: null,
+            featuredData: [],
+            categoryData: [],
+            aboutData: { aboutText: null, aboutCover: null },
+            companyName: null,
+            siteName: null,
+            statsData: {
+                param_one_name: null,
+                param_one_value: null,
+                param_two_name: null,
+                param_two_value: null,
+                param_three_name: null,
+                param_three_value: null,
+                param_four_name: null,
+                param_four_value: null,
+            },
+            commentData: [],
+            newsData: [],
+            heroText: null,
+            contactData: null,
+        };
     }
 })

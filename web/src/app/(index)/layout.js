@@ -49,7 +49,8 @@ const getInitialThemeStyles = () => {
 };
 
 export default async function RootLayout({children}) {
-    const {navSectionData, footerSectionData} = await getSectionData();
+    const sectionData = (await getSectionData()) || { navSectionData: null, footerSectionData: null };
+    const {navSectionData, footerSectionData} = sectionData;
     
     // 获取模板id
     const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
@@ -158,10 +159,10 @@ async function getSectionData() {
             return data;
         } else {
             console.error(`获取导航数据错误: ${msg}`);
-            return null;
+            return { navSectionData: null, footerSectionData: null };
         }
     } catch (err) {
         console.error("获取导航数据失败:", err);
-        return null;
+        return { navSectionData: null, footerSectionData: null };
     }
 }
