@@ -14,6 +14,7 @@ import { readCart } from '@/utils/cart';
 // 移动端菜单项组件
 function MobileMenuItem({item, level = 0, setMobileMenuOpen}) {
     const [isOpen, setIsOpen] = useState(false);
+    const subItems = Array.isArray(item?.subItems) ? item.subItems : [];
     // 根据层级动态调整缩进和字体大小
     const paddingLeft = `${1 + level * 1.5}rem`; // 动态缩进
     const fontSize = `${Math.max(1 - level * 0.1, 0.8)}rem`; // 动态字体，最低限制为 0.8rem
@@ -71,7 +72,7 @@ function MobileMenuItem({item, level = 0, setMobileMenuOpen}) {
                 </button>
                 {isOpen && (
                     <div className="mt-2 space-y-2">
-                        {item.subItems.map((subItem) => (
+                        {subItems.map((subItem) => (
                             <MobileMenuItem
                                 key={subItem.name}
                                 item={subItem}
@@ -92,6 +93,7 @@ function MobileMenuItem({item, level = 0, setMobileMenuOpen}) {
 export function DesktopNav({navigationItems, current}) {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [activeSubMenu, setActiveSubMenu] = useState(null);
+    const safeNavigationItems = Array.isArray(navigationItems) ? navigationItems : [];
 
     // 滚动到顶部
     const scrollToTop = () => {
@@ -112,7 +114,7 @@ export function DesktopNav({navigationItems, current}) {
 
     return (
         <div className="hidden lg:-ml-20 lg:flex lg:flex-1 items-center justify-center ">
-            {navigationItems.map((item, index) => (
+            {safeNavigationItems.map((item, index) => (
                 item.type === 'link' ? (
                     <Link
                         key={item.name}
@@ -150,7 +152,7 @@ export function DesktopNav({navigationItems, current}) {
                         >
                             <div className="p-0">
                                 <div className="grid grid-cols-1 gap-0">
-                                    {item.subItems.map((subItem) => (
+                                    {(Array.isArray(item?.subItems) ? item.subItems : []).map((subItem) => (
                                         <div
                                             key={subItem.name}
                                             className="group relative"
@@ -172,7 +174,7 @@ export function DesktopNav({navigationItems, current}) {
                                             </Link>
 
                                             {/* 二级下拉菜单 */}
-                                            {subItem.subItems?.length > 0 && (
+                                            {Array.isArray(subItem?.subItems) && subItem.subItems.length > 0 && (
                                                 <div
                                                     className={`absolute space-y-0 left-full top-0 ml-0.5 min-w-[200px] w-max bg-white shadow-[0_0_15px_rgba(0,0,0,0.1)] ring-1 ring-gray-900/5 p-0 transition-all duration-200 ${
                                                         activeSubMenu === subItem.name
