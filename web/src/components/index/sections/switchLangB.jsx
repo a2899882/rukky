@@ -16,14 +16,26 @@ export default function SwitchLangB({colorClass="bg-white text-gray-500 px-4 py-
     // 语言选项
     const languages = [
         { code: 'en', name: 'English' },
-        { code: 'zh', name: '中文' },
+        { code: 'zh', name: '中文(简体)' },
+        { code: 'zh-TW', name: '中文(繁體)' },
+        { code: 'ja', name: '日本語' },
+        { code: 'th', name: 'ไทย' },
+        { code: 'vi', name: 'Tiếng Việt' },
+        { code: 'fr', name: 'Français' },
+        { code: 'de', name: 'Deutsch' },
+        { code: 'es', name: 'Español' },
+        { code: 'pt', name: 'Português' },
+        { code: 'ar', name: 'العربية' },
+        { code: 'sw', name: 'Kiswahili' },
     ];
+
+    const supportedCodes = new Set(languages.map((l) => l.code));
 
     // 初始化当前语言
     useEffect(() => {
         try {
             const v = localStorage.getItem('lang') || 'en';
-            setCurrentLanguage(v === 'zh' ? 'zh' : 'en');
+            setCurrentLanguage(supportedCodes.has(v) ? v : 'en');
         } catch (e) {
             setCurrentLanguage('en');
         }
@@ -135,7 +147,7 @@ export default function SwitchLangB({colorClass="bg-white text-gray-500 px-4 py-
             {mounted && (
                 <div
                     ref={menuRef}
-                    className={`fixed ${menuPosition} bg-white border-[1px] border-gray-300 rounded-md shadow-lg w-24 z-[65] transition-all duration-200 ease-in-out transform origin-top-right ${
+                    className={`fixed ${menuPosition} bg-white border-[1px] border-gray-300 rounded-md shadow-lg w-32 z-[65] transition-all duration-200 ease-in-out transform origin-top-right ${
                         showLanguageMenu && showButton 
                             ? 'opacity-100 scale-100' 
                             : 'opacity-0 scale-95 pointer-events-none'
