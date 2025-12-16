@@ -4,6 +4,7 @@ import {headers} from "next/headers";
 import {getIp} from "@/utils/tools";
 
 export default async function Home() {
+    const commonData = (await getCommonData()) || {};
     const sectionData = (await getSectionDataCached()) || {
         seoData: { seo_title: null, seo_description: null, seo_keywords: null },
         bannerData: null,
@@ -28,8 +29,8 @@ export default async function Home() {
         contactData: null,
     };
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = commonData?.homeThemeId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '010';
 
     // 准备传递给模板的props
     const templateProps = {
@@ -50,6 +51,18 @@ export default async function Home() {
     const HomeTemplate = HomeTemplateModule.default;
     
     return <HomeTemplate {...templateProps} />;
+}
+
+async function getCommonData() {
+    try {
+        const {code, msg, data} = await api.get('/myapp/index/common/section');
+        if (code === 0) return data;
+        console.error(`获取导航数据错误: ${msg}`);
+        return null;
+    } catch (err) {
+        console.error('获取导航数据失败:', err);
+        return null;
+    }
 }
 
 export async function generateMetadata({params}) {

@@ -100,6 +100,11 @@ const items = [
         icon: <SettingOutlined />,
       },
       {
+        key: adminPath('/home-theme'),
+        label: '首页主题',
+        icon: <SettingOutlined />,
+      },
+      {
         key: adminPath('/user'),
         label: '账号管理',
         icon: <UserOutlined />,

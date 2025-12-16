@@ -2,8 +2,8 @@
 
 import Script from 'next/script';
 
-export default function ThemeScript() {
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
+export default function ThemeScript({templateId: templateIdProp}) {
+    const templateId = templateIdProp || process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
     
     const themeScript = `
         (function() {

@@ -3,7 +3,7 @@ from django.db.models import Q
 from rest_framework.decorators import api_view
 
 from myapp.handler import APIResponse
-from myapp.models import BasicSite, Category, BasicGlobal
+from myapp.models import BasicSite, Category, BasicGlobal, ShopSettings
 from myapp.serializers import BasicGlobalSerializer, BasicSiteSerializer
 
 
@@ -164,9 +164,12 @@ def section(request):
                 footer_data['navData'].append({"name": name, "href": href})
 
         # 组合最终数据
+        s = ShopSettings.get_solo()
+        home_theme_id = getattr(s, 'home_theme_id', None)
         data = {
             "navSectionData": nav_data,
-            "footerSectionData": footer_data
+            "footerSectionData": footer_data,
+            "homeThemeId": home_theme_id,
         }
 
         # 缓存数据

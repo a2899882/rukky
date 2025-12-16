@@ -27,9 +27,9 @@ const fontConfigs = {
 };
 
 // 获取当前模板的字体
-const getTemplateFont = () => {
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
-    return fontConfigs[templateId] || lato; // 默认使用 Lato
+const getTemplateFont = (templateId) => {
+    const id = templateId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
+    return fontConfigs[id] || lato; // 默认使用 Lato
 };
 
 export const metadata = {
@@ -37,26 +37,26 @@ export const metadata = {
 }
 
 // 生成内联样式，确保主题变量优先设置
-const getInitialThemeStyles = () => {
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
+const getInitialThemeStyles = (templateId) => {
+    const id = templateId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
     return `
         :root {
-            --main-color-light: var(--main-color-light-${templateId});
-            --main-color-normal: var(--main-color-normal-${templateId});
-            --main-color-deep: var(--main-color-deep-${templateId});
+            --main-color-light: var(--main-color-light-${id});
+            --main-color-normal: var(--main-color-normal-${id});
+            --main-color-deep: var(--main-color-deep-${id});
         }
     `;
 };
 
 export default async function RootLayout({children}) {
     const sectionData = (await getSectionData()) || { navSectionData: null, footerSectionData: null };
-    const {navSectionData, footerSectionData} = sectionData;
+    const {navSectionData, footerSectionData, homeThemeId} = sectionData;
     
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = homeThemeId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '010';
     
     // 获取当前模板的字体
-    const font = getTemplateFont();
+    const font = getTemplateFont(templateId);
     
     // 检查网站状态
     const isWebsiteDown = navSectionData?.basicSite?.status === "2";
@@ -75,9 +75,9 @@ export default async function RootLayout({children}) {
                 <head>
                     <title>Website Under Maintenance</title>
                     {/* 内联样式优先设置主题变量 */}
-                    <style dangerouslySetInnerHTML={{ __html: getInitialThemeStyles() }} />
+                    <style dangerouslySetInnerHTML={{ __html: getInitialThemeStyles(templateId) }} />
                     {/* 优先加载主题脚本 */}
-                    <ThemeScript />
+                    <ThemeScript templateId={templateId} />
                 </head>
                 <body className={`${font.className} bg-gray-50 overflow-x-hidden flex items-center justify-center min-h-screen`}>
                     <div className="max-w-md w-full mx-auto bg-white rounded-md shadow-lg p-8 text-center">
@@ -113,9 +113,9 @@ export default async function RootLayout({children}) {
         <html lang="en" suppressHydrationWarning>
             <head>
                 {/* 内联样式优先设置主题变量 */}
-                <style dangerouslySetInnerHTML={{ __html: getInitialThemeStyles() }} />
+                <style dangerouslySetInnerHTML={{ __html: getInitialThemeStyles(templateId) }} />
                 {/* 优先加载主题脚本 */}
-                <ThemeScript />
+                <ThemeScript templateId={templateId} />
 
                 {ga4Enabled ? (
                     <>

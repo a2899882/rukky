@@ -439,6 +439,7 @@ class ShopSettings(models.Model):
     enable_paypal = models.CharField(max_length=2, choices=SWITCH_CHOICES, default='1')
     default_currency = models.CharField(max_length=3, default='USD')
     default_shipping_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    home_theme_id = models.CharField(max_length=8, default='010')
     create_time = models.DateTimeField(auto_now_add=True, null=True)
     update_time = models.DateTimeField(auto_now=True, null=True)
 

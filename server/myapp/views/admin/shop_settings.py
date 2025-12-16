@@ -50,6 +50,7 @@ def get_api(request):
         'enablePayPal': s.enable_paypal,
         'defaultCurrency': s.default_currency,
         'defaultShippingFee': str(s.default_shipping_fee),
+        'homeThemeId': getattr(s, 'home_theme_id', '010'),
         'stripeConfigured': bool(os.getenv('STRIPE_SECRET_KEY')),
         'paypalConfigured': bool(os.getenv('PAYPAL_CLIENT_ID')) and bool(os.getenv('PAYPAL_CLIENT_SECRET')),
         'paypalEnv': os.getenv('PAYPAL_ENV') or 'sandbox',
@@ -67,6 +68,7 @@ def update_api(request):
     enable_paypal = request.data.get('enablePayPal')
     default_currency = (request.data.get('defaultCurrency') or s.default_currency or 'USD').upper()
     default_shipping_fee = request.data.get('defaultShippingFee')
+    home_theme_id = request.data.get('homeThemeId')
 
     if enable_stripe in ['1', '2']:
         s.enable_stripe = enable_stripe
@@ -79,6 +81,9 @@ def update_api(request):
             s.default_shipping_fee = default_shipping_fee
     except Exception:
         pass
+
+    if home_theme_id in ['001', '005', '010', '011']:
+        s.home_theme_id = home_theme_id
 
     s.save()
     return APIResponse(code=0, msg='更新成功')
