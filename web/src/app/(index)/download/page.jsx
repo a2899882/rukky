@@ -1,13 +1,14 @@
 import api from "@/utils/axiosApi";
 import {cache} from "react";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 
 export default async function Page() {
     const sectionData = await getSectionDataCached();
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -15,9 +16,15 @@ export default async function Page() {
         downloadData: sectionData.downloadData
     };
 
-    // 动态导入对应模板
-    const DownloadTemplateModule = await import(`@/templates/${templateId}/downloadTemplate`);
-    const DownloadTemplate = DownloadTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let DownloadTemplate;
+    try {
+        const DownloadTemplateModule = await import(`@/templates/${templateId}/downloadTemplate`);
+        DownloadTemplate = DownloadTemplateModule.default;
+    } catch (e) {
+        const DownloadTemplateModule = await import(`@/templates/010/downloadTemplate`);
+        DownloadTemplate = DownloadTemplateModule.default;
+    }
     
     return <DownloadTemplate {...templateProps} />;
 }

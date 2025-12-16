@@ -1,12 +1,13 @@
 import api from "@/utils/axiosApi";
 import {cache} from "react";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 export default async function Page() {
     const sectionData = await getSectionDataCached();
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -14,9 +15,15 @@ export default async function Page() {
         faqData: sectionData.faqData
     };
 
-    // 动态导入对应模板
-    const FaqTemplateModule = await import(`@/templates/${templateId}/faqTemplate`);
-    const FaqTemplate = FaqTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let FaqTemplate;
+    try {
+        const FaqTemplateModule = await import(`@/templates/${templateId}/faqTemplate`);
+        FaqTemplate = FaqTemplateModule.default;
+    } catch (e) {
+        const FaqTemplateModule = await import(`@/templates/010/faqTemplate`);
+        FaqTemplate = FaqTemplateModule.default;
+    }
     
     return <FaqTemplate {...templateProps} />;
 }

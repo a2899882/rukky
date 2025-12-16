@@ -1,9 +1,11 @@
 import {cache} from "react";
 import api from "@/utils/axiosApi";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 
 export default async function Page() {
+
     const {
         bannerData,
         aboutData,
@@ -15,8 +17,8 @@ export default async function Page() {
         contactData
     } = await getSectionDataCached();
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     const templateProps = {
         bannerData,
@@ -29,8 +31,14 @@ export default async function Page() {
         contactData
     };
 
-    const AboutTemplateModule = await import(`@/templates/${templateId}/aboutTemplate`);
-    const AboutTemplate = AboutTemplateModule.default;
+    let AboutTemplate;
+    try {
+        const AboutTemplateModule = await import(`@/templates/${templateId}/aboutTemplate`);
+        AboutTemplate = AboutTemplateModule.default;
+    } catch (e) {
+        const AboutTemplateModule = await import(`@/templates/010/aboutTemplate`);
+        AboutTemplate = AboutTemplateModule.default;
+    }
     return <AboutTemplate {...templateProps} />
 }
 

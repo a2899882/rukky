@@ -6,9 +6,28 @@ import axiosInstance from '@/utils/axios';
 
 const THEME_OPTIONS = [
   {
+    id: '001',
+    name: '主题 001 · Modern B2B',
+    desc: '干净、偏B2B展示风格，适合企业与品牌站。',
+    preview: '/themes/hero-001.svg',
+  },
+  {
+    id: '005',
+    name: '主题 005 · Commerce Dark',
+    desc: '电商导向，强CTA与暗色氛围，适合SKU较多。',
+    preview: '/themes/hero-005.svg',
+  },
+  {
     id: '010',
     name: '独立站·通用（推荐）',
     desc: '通用型营销首页，适合大多数品类。',
+    preview: '/themes/hero-010.svg',
+  },
+  {
+    id: '011',
+    name: '主题 011 · Premium',
+    desc: '更强品牌质感与留白，适合中高客单。',
+    preview: '/themes/hero-011.svg',
   },
 ];
 
@@ -79,7 +98,11 @@ export default function Page() {
                     </div>
                   </div>
                   <div className="mt-4 h-24 bg-gray-50 border border-dashed border-gray-200 flex items-center justify-center text-xs text-gray-400">
-                    预览图（后续可替换为真实截图）
+                    {t.preview ? (
+                      <img src={t.preview} alt="preview" className="w-full h-24 object-cover" />
+                    ) : (
+                      '预览图'
+                    )}
                   </div>
                 </div>
               </Col>

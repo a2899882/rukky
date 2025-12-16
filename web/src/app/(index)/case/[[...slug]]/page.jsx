@@ -1,14 +1,16 @@
 import api from "@/utils/axiosApi";
 import {cache} from "react";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 export default async function Page({params}) {
+
     const pageNumber = getPageNumber(params?.slug);
     const urlParams = {page: pageNumber, pageSize: 9};
     const sectionData = await getSectionDataCached(urlParams);
     
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -18,9 +20,15 @@ export default async function Page({params}) {
         caseData: sectionData.caseData
     };
 
-    // 动态导入对应模板
-    const CaseTemplateModule = await import(`@/templates/${templateId}/caseTemplate`);
-    const CaseTemplate = CaseTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let CaseTemplate;
+    try {
+        const CaseTemplateModule = await import(`@/templates/${templateId}/caseTemplate`);
+        CaseTemplate = CaseTemplateModule.default;
+    } catch (e) {
+        const CaseTemplateModule = await import(`@/templates/010/caseTemplate`);
+        CaseTemplate = CaseTemplateModule.default;
+    }
     
     return <CaseTemplate {...templateProps} />;
 }

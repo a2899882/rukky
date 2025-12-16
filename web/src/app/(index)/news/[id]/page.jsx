@@ -1,6 +1,7 @@
 import {cache, Suspense} from 'react';
 import api from "@/utils/axiosApi";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 // 使用React的缓存机制优化API调用
 const getNewsDetailCached = cache(async (id) => {    // 这里应该是从API获取数据
@@ -69,13 +70,19 @@ export default async function Page({params}) {
     const {id} = params;
     const data = await getNewsDetailCached(id);
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     if (!data) {
         // 动态导入对应模板并传入空数据
-        const NewsDetailTemplateModule = await import(`@/templates/${templateId}/newsDetailTemplate`);
-        const NewsDetailTemplate = NewsDetailTemplateModule.default;
+        let NewsDetailTemplate;
+        try {
+            const NewsDetailTemplateModule = await import(`@/templates/${templateId}/newsDetailTemplate`);
+            NewsDetailTemplate = NewsDetailTemplateModule.default;
+        } catch (e) {
+            const NewsDetailTemplateModule = await import(`@/templates/010/newsDetailTemplate`);
+            NewsDetailTemplate = NewsDetailTemplateModule.default;
+        }
         return <NewsDetailTemplate detailData={null} />;
     }
 
@@ -103,9 +110,15 @@ export default async function Page({params}) {
         shareLinks
     };
 
-    // 动态导入对应模板
-    const NewsDetailTemplateModule = await import(`@/templates/${templateId}/newsDetailTemplate`);
-    const NewsDetailTemplate = NewsDetailTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let NewsDetailTemplate;
+    try {
+        const NewsDetailTemplateModule = await import(`@/templates/${templateId}/newsDetailTemplate`);
+        NewsDetailTemplate = NewsDetailTemplateModule.default;
+    } catch (e) {
+        const NewsDetailTemplateModule = await import(`@/templates/010/newsDetailTemplate`);
+        NewsDetailTemplate = NewsDetailTemplateModule.default;
+    }
     
     return <NewsDetailTemplate {...templateProps} />;
 }

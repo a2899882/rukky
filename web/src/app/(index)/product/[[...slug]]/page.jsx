@@ -1,8 +1,10 @@
 import {cache} from "react";
 import api from "@/utils/axiosApi";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 export default async function Page({params, searchParams}) {
+
     // 解析slug参数
     const slug = params?.slug || [];
 
@@ -11,10 +13,10 @@ export default async function Page({params, searchParams}) {
     let pageNumber = 1;
     let pageSize = 9;
 
-    const id = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    const templateId = await getThemeIdOrDefault('010');
 
     // 兼容模板
-    if (['004', '005', '006', '007', '008', '009', '010'].includes(id)) {
+    if (['004', '005', '006', '007', '008', '009', '010', '011'].includes(templateId)) {
         pageSize = 12;
     }
 
@@ -40,9 +42,6 @@ export default async function Page({params, searchParams}) {
     const urlParams = {page: pageNumber, pageSize: pageSize, categoryId, searchQuery}
     const {bannerData, categoryData, productData, featuredData, total} = await getSectionDataCached(urlParams)
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
-
     // 准备传递给模板的props
     const templateProps = {
         bannerData,
@@ -56,10 +55,16 @@ export default async function Page({params, searchParams}) {
         searchQuery
     };
 
-    // 动态导入对应模板
-    const ProductTemplateModule = await import(`@/templates/${templateId}/productTemplate`);
-    const ProductTemplate = ProductTemplateModule.default;
-    
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let ProductTemplate;
+    try {
+        const ProductTemplateModule = await import(`@/templates/${templateId}/productTemplate`);
+        ProductTemplate = ProductTemplateModule.default;
+    } catch (e) {
+        const ProductTemplateModule = await import(`@/templates/010/productTemplate`);
+        ProductTemplate = ProductTemplateModule.default;
+    }
+
     return <ProductTemplate {...templateProps} />;
 }
 

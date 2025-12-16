@@ -59,6 +59,11 @@
     --main-color-light-010:  22, 93%, 90%;
     --main-color-normal-010: 22, 93%, 55%;
     --main-color-deep-010:  22, 93%, 50%;
+
+    /* 模板11的颜色 */
+    --main-color-light-011:  260, 100%, 96%;
+    --main-color-normal-011: 260, 85%, 62%;
+    --main-color-deep-011:  260, 85%, 50%;
 }
 
 .btn {

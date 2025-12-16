@@ -1,12 +1,13 @@
 import api from "@/utils/axiosApi";
 import {cache} from "react";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 export default async function Page() {
     const {bannerData, contactData, recommendData} = await getSectionDataCached();
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -15,9 +16,15 @@ export default async function Page() {
         recommendData
     };
 
-    // 动态导入对应模板
-    const ContactTemplateModule = await import(`@/templates/${templateId}/contactTemplate`);
-    const ContactTemplate = ContactTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let ContactTemplate;
+    try {
+        const ContactTemplateModule = await import(`@/templates/${templateId}/contactTemplate`);
+        ContactTemplate = ContactTemplateModule.default;
+    } catch (e) {
+        const ContactTemplateModule = await import(`@/templates/010/contactTemplate`);
+        ContactTemplate = ContactTemplateModule.default;
+    }
 
     return <ContactTemplate {...templateProps} />;
 }

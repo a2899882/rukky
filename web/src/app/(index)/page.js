@@ -1,10 +1,9 @@
 import {cache} from "react";
 import api from "@/utils/axiosApi";
-import {headers} from "next/headers";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 export default async function Home() {
-    const commonData = (await getCommonData()) || {};
     const sectionData = (await getSectionDataCached()) || {
         seoData: { seo_title: null, seo_description: null, seo_keywords: null },
         bannerData: null,
@@ -30,7 +29,7 @@ export default async function Home() {
     };
 
     // 获取模板id（优先使用后台设置）
-    const templateId = commonData?.homeThemeId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '010';
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -59,35 +58,19 @@ export default async function Home() {
     return <HomeTemplate {...templateProps} />;
 }
 
-async function getCommonData() {
-    try {
-        const {code, msg, data} = await api.get('/myapp/index/common/section');
-        if (code === 0) return data;
-        console.error(`获取导航数据错误: ${msg}`);
-        return null;
-    } catch (err) {
-        console.error('获取导航数据失败:', err);
-        return null;
-    }
-}
-
-export async function generateMetadata({params}) {
-    // 使用缓存的函数获取案例详情数据
+export async function generateMetadata() {
     const data = (await getSectionDataCached()) || {
         seoData: { seo_title: null, seo_description: null, seo_keywords: null },
         siteName: null,
     };
 
-    // 从详情数据中提取信息
     const {seo_title, seo_description, seo_keywords} = data.seoData || {};
     const siteName = data.siteName;
 
-    // 返回动态生成的metadata
     return {
         title: seo_title || siteName || 'Home',
         description: seo_description || siteName || 'Home',
         keywords: seo_keywords || siteName || 'Home',
-        // Open Graph
         openGraph: {
             title: seo_title || siteName || 'Home',
             description: seo_description || siteName || 'Home',
@@ -96,7 +79,6 @@ export async function generateMetadata({params}) {
             image: '',
             type: 'website',
         },
-        // Twitter
         twitter: {
             card: 'summary',
             title: seo_title || siteName || 'Home',
@@ -116,6 +98,7 @@ const getSectionDataCached = cache(async () => {
             'Content-Type': 'application/json',
             'x-forwarded-for': getIp()
         };
+
         const {code, msg, data} = await api.get('/myapp/index/home/section', {headers});
         if (code === 0) {
             return data;

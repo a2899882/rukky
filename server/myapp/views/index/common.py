@@ -165,7 +165,7 @@ def section(request):
 
         # 组合最终数据
         s = ShopSettings.get_solo()
-        home_theme_id = getattr(s, 'home_theme_id', None)
+        home_theme_id = getattr(s, 'home_theme_id', None) or '001'
         data = {
             "navSectionData": nav_data,
             "footerSectionData": footer_data,

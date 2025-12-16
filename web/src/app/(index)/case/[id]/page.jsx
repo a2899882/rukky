@@ -1,6 +1,7 @@
 import api from "@/utils/axiosApi";
 import {cache} from 'react';
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 // 使用React的缓存机制优化API调用
 const getCaseDetailCached = cache(async (id) => {
@@ -52,8 +53,8 @@ export default async function Page({params}) {
         return <div>Case not found</div>;
     }
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -62,9 +63,15 @@ export default async function Page({params}) {
         recommendData: data.recommendData
     };
 
-    // 动态导入对应模板
-    const CaseDetailTemplateModule = await import(`@/templates/${templateId}/caseDetailTemplate`);
-    const CaseDetailTemplate = CaseDetailTemplateModule.default;
-    
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let CaseDetailTemplate;
+    try {
+        const CaseDetailTemplateModule = await import(`@/templates/${templateId}/caseDetailTemplate`);
+        CaseDetailTemplate = CaseDetailTemplateModule.default;
+    } catch (e) {
+        const CaseDetailTemplateModule = await import(`@/templates/010/caseDetailTemplate`);
+        CaseDetailTemplate = CaseDetailTemplateModule.default;
+    }
+
     return <CaseDetailTemplate {...templateProps} />;
 }

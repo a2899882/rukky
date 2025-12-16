@@ -1,6 +1,7 @@
 import {cache} from "react";
 import api from "@/utils/axiosApi";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 // 使用React的缓存机制优化API调用
 const getThingDetailCached = cache(async (id) => {
@@ -69,8 +70,8 @@ export default async function Page({params}) {
     // 使用相同的缓存函数获取数据
     const {detailData, relatedData} = await getThingDetailCached(id);
 
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    // 获取模板id（优先使用后台设置）
+    const templateId = await getThemeIdOrDefault('010');
 
     // 准备传递给模板的props
     const templateProps = {
@@ -78,9 +79,15 @@ export default async function Page({params}) {
         relatedData
     };
 
-    // 动态导入对应模板
-    const ProductDetailTemplateModule = await import(`@/templates/${templateId}/productDetailTemplate`);
-    const ProductDetailTemplate = ProductDetailTemplateModule.default;
-    
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let ProductDetailTemplate;
+    try {
+        const ProductDetailTemplateModule = await import(`@/templates/${templateId}/productDetailTemplate`);
+        ProductDetailTemplate = ProductDetailTemplateModule.default;
+    } catch (e) {
+        const ProductDetailTemplateModule = await import(`@/templates/010/productDetailTemplate`);
+        ProductDetailTemplate = ProductDetailTemplateModule.default;
+    }
+
     return <ProductDetailTemplate {...templateProps} />;
 }

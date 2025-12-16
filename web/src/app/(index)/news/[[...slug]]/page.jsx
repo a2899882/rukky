@@ -1,24 +1,22 @@
 import api from "@/utils/axiosApi";
 import {cache} from "react";
 import {getIp} from "@/utils/tools";
+import {getThemeIdOrDefault} from "@/utils/getThemeId";
 
 export default async function Page({params}) {
 
     let pageSize = 9;
 
-    const id = process.env.NEXT_PUBLIC_TEMPLATE_ID;
+    const templateId = await getThemeIdOrDefault('010');
 
     // 兼容模板
-    if (['006', '009'].includes(id)) {
+    if (['006', '009'].includes(templateId)) {
         pageSize = 10;
     }
 
     const pageNumber = getPageNumber(params?.slug);
     const urlParams = {page: pageNumber, pageSize: pageSize};
     const sectionData = await getSectionDataCached(urlParams);
-
-    // 获取模板id
-    const templateId = process.env.NEXT_PUBLIC_TEMPLATE_ID;
 
     // 准备传递给模板的props
     const templateProps = {
@@ -30,9 +28,15 @@ export default async function Page({params}) {
         featuredData: sectionData.featuredData
     };
 
-    // 动态导入对应模板
-    const NewsTemplateModule = await import(`@/templates/${templateId}/newsTemplate`);
-    const NewsTemplate = NewsTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let NewsTemplate;
+    try {
+        const NewsTemplateModule = await import(`@/templates/${templateId}/newsTemplate`);
+        NewsTemplate = NewsTemplateModule.default;
+    } catch (e) {
+        const NewsTemplateModule = await import(`@/templates/010/newsTemplate`);
+        NewsTemplate = NewsTemplateModule.default;
+    }
     
     return <NewsTemplate {...templateProps} />;
 }
