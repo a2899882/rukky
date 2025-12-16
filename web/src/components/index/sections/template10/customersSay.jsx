@@ -2,6 +2,7 @@ import lang from "@/locales";
 import Image from "next/image";
 
 export default function CustomersSay({commentData}){
+    const safeCommentData = Array.isArray(commentData) ? commentData : [];
     // 客户评价数据
     const testimonials = [
         {
@@ -37,7 +38,7 @@ export default function CustomersSay({commentData}){
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-16">
-                    {commentData.map((testimonial) => (
+                    {safeCommentData.map((testimonial) => (
                         <div key={testimonial.id} className="flex flex-col">
                             {/* 引号  */}
                             <div className="text-2xl text-mainColorNormal mb-6">

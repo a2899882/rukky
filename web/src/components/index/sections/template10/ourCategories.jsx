@@ -34,6 +34,7 @@ function CategoryCard({category}) {
 }
 
 export default function OurCategories({categoryData}) {
+    const safeCategoryData = Array.isArray(categoryData) ? categoryData : [];
     return (
         <div className="py-12 bg-mainColorLight">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,7 +46,7 @@ export default function OurCategories({categoryData}) {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    {categoryData?.slice(0, 4).map((category) => (
+                    {safeCategoryData.slice(0, 4).map((category) => (
                         <CategoryCard key={category.id} category={category}/>
                     ))}
                 </div>

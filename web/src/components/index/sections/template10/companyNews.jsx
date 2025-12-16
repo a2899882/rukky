@@ -5,6 +5,7 @@ import lang from "@/locales";
 
 
 export default function CompanyNews({newsData}) {
+  const safeNewsData = Array.isArray(newsData) ? newsData : [];
   return (
       <div className="mx-auto w-full max-w-7xl px-6 lg:px-8 py-16">
           <div className="text-center mb-12">
@@ -16,7 +17,7 @@ export default function CompanyNews({newsData}) {
               </p>
           </div>
           <div className="w-full mx-auto mt-12 grid grid-cols-1 gap-8 sm:mt-20 lg:grid-cols-3">
-              {newsData.map((post) => (
+              {safeNewsData.map((post, idx) => (
                   <div
                       key={post.id}
                       className="relative isolate flex flex-col justify-end overflow-hidden bg-gray-900 transform transition-transform duration-300"
@@ -29,7 +30,7 @@ export default function CompanyNews({newsData}) {
                               fill
                               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                               className="object-cover transition-transform duration-500 hover:scale-105" 
-                              priority={newsData.indexOf(post) < 3}
+                              priority={idx < 3}
                           />
                       </div>
 

@@ -34,6 +34,7 @@ function ProductCard({ product }) {
 }
 
 export default function FeaturedProducts({featuredData}) {
+    const safeFeaturedData = Array.isArray(featuredData) ? featuredData : [];
     return (
         <div className="py-12 sm:py-16 bg-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,7 +44,7 @@ export default function FeaturedProducts({featuredData}) {
                 </div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 lg:gap-x-6 gap-y-5 lg:gap-y-10">
-                    {featuredData.map((product) => (
+                    {safeFeaturedData.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
