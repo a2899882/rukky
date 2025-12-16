@@ -12,6 +12,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         username = (os.getenv('ADMIN_USERNAME') or '').strip()
         password = (os.getenv('ADMIN_PASSWORD') or '').strip()
+        force_change = (os.getenv('ADMIN_FORCE_CHANGE_ON_FIRST_LOGIN') or '0').strip() == '1'
 
         if not username or not password:
             self.stdout.write('ADMIN_USERNAME/ADMIN_PASSWORD not set, skip init_admin')
@@ -26,6 +27,7 @@ class Command(BaseCommand):
                 'password': password_hash,
                 'role': '1',
                 'status': '0',
+                'must_change_password': '1' if force_change else '0',
                 'nickname': username,
             },
         )
@@ -38,12 +40,16 @@ class Command(BaseCommand):
             if user.status != '0':
                 user.status = '0'
                 changed = True
-            if user.password != password_hash:
-                user.password = password_hash
-                changed = True
+            # Only force password change when the user is still using the default password
+            if force_change:
+                should_force = (user.password == password_hash)
+                desired = '1' if should_force else '0'
+                if getattr(user, 'must_change_password', '0') != desired:
+                    user.must_change_password = desired
+                    changed = True
 
             if changed:
-                user.save(update_fields=['role', 'status', 'password'])
+                user.save(update_fields=['role', 'status', 'must_change_password'])
                 self.stdout.write(f'Updated admin user: {username}')
             else:
                 self.stdout.write(f'Admin user exists: {username}')

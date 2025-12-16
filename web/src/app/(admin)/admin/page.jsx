@@ -12,7 +12,12 @@ export default function Page() {
         if(!admintoken){
             router.push(adminLoginPath());
         }else {
-            router.push(adminPath('/main'));
+            const mustChange = localStorage.getItem('admin_must_change_password');
+            if (mustChange === '1') {
+                router.push(adminPath('/forceChangePassword'));
+            } else {
+                router.push(adminPath('/main'));
+            }
         }
     }, []);
 

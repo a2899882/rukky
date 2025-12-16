@@ -58,7 +58,7 @@ def admin_login(request):
         if user.role == '2':
             return APIResponse(code=1, msg='请使用管理员账号登录')
 
-        serializer = UserSerializer(user, data=data)
+        serializer = UserSerializer(user, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             cache.delete(fail_key)
@@ -167,7 +167,9 @@ def updatePwd(request):
 
     data = request.data.copy()
     data.update({'password': utils.md5value(newPassword1)})
-    serializer = UserSerializer(user, data=data)
+    if getattr(user, 'must_change_password', '0') != '0':
+        data.update({'must_change_password': '0'})
+    serializer = UserSerializer(user, data=data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return APIResponse(code=0, msg='更新成功', data=serializer.data)

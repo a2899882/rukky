@@ -39,10 +39,20 @@ const LoginPage = () => {
                 message.success("登录成功")
                 localStorage.setItem('admintoken', data.admin_token);
                 localStorage.setItem('username', data.username);
-                router.push(adminPath('/main'));
+                if (data?.id) {
+                    localStorage.setItem('admin_user_id', String(data.id));
+                }
+                const mustChange = String(data?.must_change_password || '0');
+                localStorage.setItem('admin_must_change_password', mustChange);
+                if (mustChange === '1') {
+                    router.push(adminPath('/forceChangePassword'));
+                } else {
+                    router.push(adminPath('/main'));
+                }
             } else {
                 message.error(msg || '网络异常')
             }
+
             setLoading(false);
         } catch (err) {
             console.log(err)

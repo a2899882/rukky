@@ -12,6 +12,7 @@ class User(models.Model):
     password = models.CharField(max_length=50, null=True)
     role = models.CharField(max_length=2, blank=True, null=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='0')
+    must_change_password = models.CharField(max_length=1, default='0')
     nickname = models.CharField(blank=True, null=True, max_length=20)
     mobile = models.CharField(max_length=13, blank=True, null=True)
     email = models.CharField(max_length=50, blank=True, null=True)
