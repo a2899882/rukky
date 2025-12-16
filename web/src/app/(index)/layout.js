@@ -105,9 +105,15 @@ export default async function RootLayout({children}) {
         );
     }
     
-    // 动态导入对应模板
-    const IndexLayoutTemplateModule = await import(`@/templates/${templateId}/indexLayoutTemplate`);
-    const IndexLayoutTemplate = IndexLayoutTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let IndexLayoutTemplate;
+    try {
+        const IndexLayoutTemplateModule = await import(`@/templates/${templateId}/indexLayoutTemplate`);
+        IndexLayoutTemplate = IndexLayoutTemplateModule.default;
+    } catch (e) {
+        const IndexLayoutTemplateModule = await import(`@/templates/010/indexLayoutTemplate`);
+        IndexLayoutTemplate = IndexLayoutTemplateModule.default;
+    }
     
     return (
         <html lang="en" suppressHydrationWarning>

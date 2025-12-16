@@ -46,9 +46,15 @@ export default async function Home() {
         contactData: sectionData.contactData
     };
 
-    // 动态导入对应模板
-    const HomeTemplateModule = await import(`@/templates/${templateId}/homeTemplate`);
-    const HomeTemplate = HomeTemplateModule.default;
+    // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
+    let HomeTemplate;
+    try {
+        const HomeTemplateModule = await import(`@/templates/${templateId}/homeTemplate`);
+        HomeTemplate = HomeTemplateModule.default;
+    } catch (e) {
+        const HomeTemplateModule = await import(`@/templates/010/homeTemplate`);
+        HomeTemplate = HomeTemplateModule.default;
+    }
     
     return <HomeTemplate {...templateProps} />;
 }

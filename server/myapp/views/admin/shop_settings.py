@@ -83,7 +83,7 @@ def update_api(request):
     except Exception:
         pass
 
-    if home_theme_id in ['001', '005', '010', '011']:
+    if home_theme_id in ['010']:
         s.home_theme_id = home_theme_id
 
     s.save()
