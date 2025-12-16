@@ -1,6 +1,7 @@
 import os
 
 import requests
+from django.core.cache import cache
 from rest_framework.decorators import api_view, authentication_classes
 
 from myapp.auth.authentication import AdminTokenAuthtication
@@ -86,6 +87,9 @@ def update_api(request):
         s.home_theme_id = home_theme_id
 
     s.save()
+    # Invalidate cached frontend sections so homepage theme changes take effect immediately
+    cache.delete('section_view:/myapp/index/common/section')
+    cache.delete('section_view:/myapp/index/home/section')
     return APIResponse(code=0, msg='更新成功')
 
 
