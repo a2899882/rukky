@@ -285,7 +285,7 @@ export function MobileNav({sectionData, mobileMenuOpen, setMobileMenuOpen}) {
                         <div className="py-6">
                             <div className="flex items-center justify-center space-x-5">
                                 {/* Facebook */}
-                                {sectionData?.basicGlobal?.global_facebook?.trim().length > 0 && (
+                                {sectionData?.basicGlobal?.global_facebook?.trim()?.length > 0 && (
                                     <Link href={sectionData['basicGlobal']['global_facebook']} target="_blank"
                                           className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -295,7 +295,7 @@ export function MobileNav({sectionData, mobileMenuOpen, setMobileMenuOpen}) {
                                     </Link>
                                 )}
                                 {/* Twitter */}
-                                {sectionData?.basicGlobal?.global_twitter?.trim().length > 0 && (
+                                {sectionData?.basicGlobal?.global_twitter?.trim()?.length > 0 && (
                                     <Link href={sectionData['basicGlobal']['global_twitter']} target="_blank"
                                           className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -305,7 +305,7 @@ export function MobileNav({sectionData, mobileMenuOpen, setMobileMenuOpen}) {
                                     </Link>
                                 )}
                                 {/* Instagram */}
-                                {sectionData?.basicGlobal?.global_instagram?.trim().length > 0 && (
+                                {sectionData?.basicGlobal?.global_instagram?.trim()?.length > 0 && (
                                     <Link href={sectionData['basicGlobal']['global_instagram']} target="_blank"
                                           className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -315,7 +315,7 @@ export function MobileNav({sectionData, mobileMenuOpen, setMobileMenuOpen}) {
                                     </Link>
                                 )}
                                 {/* LinkedIn */}
-                                {sectionData?.basicGlobal?.global_linkedin?.trim().length > 0 && (
+                                {sectionData?.basicGlobal?.global_linkedin?.trim()?.length > 0 && (
                                     <Link href={sectionData['basicGlobal']['global_linkedin']} target="_blank"
                                           className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -325,7 +325,7 @@ export function MobileNav({sectionData, mobileMenuOpen, setMobileMenuOpen}) {
                                     </Link>
                                 )}
                                 {/* YouTube */}
-                                {sectionData?.basicGlobal?.global_youtube?.trim().length > 0 && (
+                                {sectionData?.basicGlobal?.global_youtube?.trim()?.length > 0 && (
                                     <Link href={sectionData['basicGlobal']['global_youtube']} target="_blank"
                                           className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -335,7 +335,7 @@ export function MobileNav({sectionData, mobileMenuOpen, setMobileMenuOpen}) {
                                     </Link>
                                 )}
                                 {/* WhatsApp */}
-                                {sectionData?.basicGlobal?.global_whatsapp?.trim().length > 0 && (
+                                {sectionData?.basicGlobal?.global_whatsapp?.trim()?.length > 0 && (
                                     <Link href={sectionData['basicGlobal']['global_whatsapp']} target="_blank"
                                           className="text-gray-700 hover:text-mainColorNormal transition-colors">
                                         <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
