@@ -95,6 +95,14 @@ const zh = {
     OurCustomersSayTip: "聆听客户对我们产品的真实体验反馈。",
     CompanyNews: "公司新闻",
     CompanyNewsTip: "通过我们的专家建议，了解如何发展您的业务。",
+    // Demo theme (001/005/011)
+    demo_theme_desc: "演示模块已就绪，你只需替换图片与文案即可快速上线。",
+    demo_explore_products: "浏览产品",
+    demo_contact_sales: "联系销售",
+    demo_shop_now: "立即选购",
+    demo_view_cart: "查看购物车",
+    demo_view_catalog: "查看目录",
+    demo_about_us: "关于我们",
 };
 
 export default zh;

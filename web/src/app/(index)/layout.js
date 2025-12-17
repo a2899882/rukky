@@ -160,7 +160,7 @@ export default async function RootLayout({children}) {
 // 服务端获取数据
 async function getSectionData() {
     try {
-        const {code, msg, data} = await api.get('/myapp/index/common/section');
+        const {code, msg, data} = await api.get('/myapp/index/common/section', { params: { _ts: Date.now() } });
         if (code === 0) {
             return data;
         } else {

@@ -114,6 +114,14 @@ const en = {
     CompanyNews: "Company News",
     NewsAndEvents: "News & Events",
     CompanyNewsTip: "Learn how to grow your business with our expert advice.",
+    // Demo theme (001/005/011)
+    demo_theme_desc: "Demo blocks are ready-to-use. Replace images and copy with your real content.",
+    demo_explore_products: "Explore Products",
+    demo_contact_sales: "Contact Sales",
+    demo_shop_now: "Shop Now",
+    demo_view_cart: "View Cart",
+    demo_view_catalog: "View Catalog",
+    demo_about_us: "About Us",
 };
 
 export default en;

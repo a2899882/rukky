@@ -1,8 +1,11 @@
-export default function HomeTemplate({
+ 'use client';
+
+ export default function HomeTemplate({
   featuredData,
   categoryData,
   heroText,
 }) {
+  const lang = require('@/locales').default;
   const hero = '/themes/hero-005.svg';
   const u1 = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1600&q=60';
 
@@ -19,14 +22,14 @@ export default function HomeTemplate({
                 {heroText || 'Best sellers for your next order'}
               </div>
               <div className="text-white/80 mt-3 max-w-2xl">
-                Big hero, strong CTA, product-first layout.
+                {lang?.demo_theme_desc || 'Big hero, strong CTA, product-first layout.'}
               </div>
               <div className="mt-6 flex gap-3">
                 <a href="/product" className="px-5 py-3 bg-[hsl(var(--main-color-normal))] text-gray-950 font-semibold">
-                  Shop Now
+                  {lang?.demo_shop_now || 'Shop Now'}
                 </a>
                 <a href="/cart" className="px-5 py-3 border border-white/20 text-white font-medium">
-                  View Cart
+                  {lang?.demo_view_cart || 'View Cart'}
                 </a>
               </div>
             </div>

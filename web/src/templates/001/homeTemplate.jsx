@@ -1,4 +1,6 @@
-export default function HomeTemplate({
+ 'use client';
+
+ export default function HomeTemplate({
   bannerData,
   featuredData,
   categoryData,
@@ -9,6 +11,7 @@ export default function HomeTemplate({
   newsData,
   heroText,
 }) {
+  const lang = require('@/locales').default;
   const hero = '/themes/hero-001.svg';
   const unsplash = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1600&q=60';
 
@@ -25,14 +28,14 @@ export default function HomeTemplate({
               {heroText || 'Build your next brand-ready storefront'}
             </div>
             <div className="text-gray-600 mt-3 max-w-2xl">
-              Demo blocks are ready-to-use. Replace images and copy with your real content.
+              {lang?.demo_theme_desc || 'Demo blocks are ready-to-use. Replace images and copy with your real content.'}
             </div>
             <div className="mt-5 flex gap-3">
               <a href="/product" className="px-5 py-3 bg-[hsl(var(--main-color-normal))] text-white font-medium">
-                Explore Products
+                {lang?.demo_explore_products || 'Explore Products'}
               </a>
               <a href="/contact" className="px-5 py-3 border border-gray-200 text-gray-700 font-medium">
-                Contact Sales
+                {lang?.demo_contact_sales || 'Contact Sales'}
               </a>
             </div>
           </div>

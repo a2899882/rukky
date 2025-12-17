@@ -48,6 +48,10 @@ export default function SwitchLangB({colorClass="bg-white text-gray-500 px-4 py-
             localStorage.setItem('lang', code);
         } catch (e) {
         }
+        try {
+            document.cookie = `lang=${encodeURIComponent(code)}; Path=/; Max-Age=31536000; SameSite=Lax`;
+        } catch (e) {
+        }
         window.location.reload();
     }
 

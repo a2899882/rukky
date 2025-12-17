@@ -1,8 +1,11 @@
-export default function HomeTemplate({
+ 'use client';
+
+ export default function HomeTemplate({
   aboutData,
   companyName,
   heroText,
 }) {
+  const lang = require('@/locales').default;
   const hero = '/themes/hero-011.svg';
   const u1 = 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1600&q=60';
 
@@ -19,14 +22,14 @@ export default function HomeTemplate({
                 {heroText || 'Premium layout for brand-first storefronts'}
               </div>
               <div className="text-gray-700 mt-4">
-                Elegant spacing, soft gradients, and a premium feel. Swap content from admin without code.
+                {lang?.demo_theme_desc || 'Elegant spacing, soft gradients, and a premium feel. Swap content from admin without code.'}
               </div>
               <div className="mt-6 flex gap-3">
                 <a href="/product" className="px-5 py-3 bg-[hsl(var(--main-color-normal))] text-white font-semibold">
-                  View Catalog
+                  {lang?.demo_view_catalog || 'View Catalog'}
                 </a>
                 <a href="/about" className="px-5 py-3 border border-gray-200 text-gray-800 font-medium">
-                  About Us
+                  {lang?.demo_about_us || 'About Us'}
                 </a>
               </div>
             </div>
