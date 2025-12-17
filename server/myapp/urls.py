@@ -82,6 +82,7 @@ urlpatterns = [
     path('admin/shop/settings/get', views.admin.shop_settings.get_api),
     path('admin/shop/settings/update', views.admin.shop_settings.update_api),
     path('admin/shop/settings/testPayPal', views.admin.shop_settings.test_paypal),
+    path('admin/shop/settings/testStripe', views.admin.shop_settings.test_stripe),
 
     path('admin/media/list', views.admin.media.list_api),
     path('admin/media/delete', views.admin.media.delete_api),

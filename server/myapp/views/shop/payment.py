@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 
 from myapp.handler import APIResponse
 from myapp.models import Order, Payment, ShopSettings, OrderItem, Thing, ThingSku
+from myapp.crypto import decrypt_text
 
 
 def _public_base_url():
@@ -16,18 +17,18 @@ def _public_base_url():
     return (public_base or '').rstrip('/')
 
 
-def _paypal_api_base():
-    paypal_env = (os.getenv('PAYPAL_ENV') or 'sandbox').lower()
+def _paypal_api_base(paypal_env: str = None):
+    paypal_env = (paypal_env or os.getenv('PAYPAL_ENV') or 'sandbox').lower()
     return 'https://api-m.sandbox.paypal.com' if paypal_env != 'live' else 'https://api-m.paypal.com'
 
 
-def _paypal_get_access_token():
-    client_id = os.getenv('PAYPAL_CLIENT_ID')
-    client_secret = os.getenv('PAYPAL_CLIENT_SECRET')
+def _paypal_get_access_token(client_id: str = None, client_secret: str = None, paypal_env: str = None):
+    client_id = client_id or os.getenv('PAYPAL_CLIENT_ID')
+    client_secret = client_secret or os.getenv('PAYPAL_CLIENT_SECRET')
     if not client_id or not client_secret:
         return None, 'PayPal 未配置（缺少 PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET）'
 
-    api_base = _paypal_api_base()
+    api_base = _paypal_api_base(paypal_env)
     try:
         resp = requests.post(
             f"{api_base}/v1/oauth2/token",
@@ -44,6 +45,44 @@ def _paypal_get_access_token():
 
     data = resp.json()
     return data.get('access_token'), None
+
+
+def _get_payment_settings():
+    s = ShopSettings.get_solo()
+    stripe_key = None
+    stripe_webhook_secret = None
+    paypal_client_id = None
+    paypal_client_secret = None
+    paypal_env = None
+
+    if s:
+        paypal_env = getattr(s, 'paypal_env', None)
+        try:
+            stripe_key = decrypt_text(getattr(s, 'stripe_secret_key_enc', None))
+        except Exception:
+            stripe_key = None
+        try:
+            stripe_webhook_secret = decrypt_text(getattr(s, 'stripe_webhook_secret_enc', None))
+        except Exception:
+            stripe_webhook_secret = None
+        try:
+            paypal_client_id = decrypt_text(getattr(s, 'paypal_client_id_enc', None))
+        except Exception:
+            paypal_client_id = None
+        try:
+            paypal_client_secret = decrypt_text(getattr(s, 'paypal_client_secret_enc', None))
+        except Exception:
+            paypal_client_secret = None
+
+    return {
+        'enable_stripe': getattr(s, 'enable_stripe', '1') if s else '1',
+        'enable_paypal': getattr(s, 'enable_paypal', '1') if s else '1',
+        'stripe_key': stripe_key or os.getenv('STRIPE_SECRET_KEY'),
+        'stripe_webhook_secret': stripe_webhook_secret or os.getenv('STRIPE_WEBHOOK_SECRET'),
+        'paypal_env': (paypal_env or os.getenv('PAYPAL_ENV') or 'sandbox'),
+        'paypal_client_id': paypal_client_id or os.getenv('PAYPAL_CLIENT_ID'),
+        'paypal_client_secret': paypal_client_secret or os.getenv('PAYPAL_CLIENT_SECRET'),
+    }
 
 
 def _deduct_inventory_for_order(order_id):
@@ -112,11 +151,11 @@ def stripe_create_session(request):
     if order.status != 'pending':
         return APIResponse(code=1, msg='订单状态不允许支付')
 
-    s = ShopSettings.get_solo()
-    if s and s.enable_stripe != '1':
+    cfg = _get_payment_settings()
+    if cfg.get('enable_stripe') != '1':
         return APIResponse(code=1, msg='Stripe 已在后台关闭')
 
-    stripe_key = os.getenv('STRIPE_SECRET_KEY')
+    stripe_key = cfg.get('stripe_key')
     if not stripe_key:
         return APIResponse(code=1, msg='Stripe 未配置（缺少 STRIPE_SECRET_KEY）')
 
@@ -180,7 +219,7 @@ def stripe_confirm(request):
     except Order.DoesNotExist:
         return APIResponse(code=1, msg='订单不存在或token不正确')
 
-    stripe_key = os.getenv('STRIPE_SECRET_KEY')
+    stripe_key = _get_payment_settings().get('stripe_key')
     if not stripe_key:
         return APIResponse(code=1, msg='Stripe 未配置（缺少 STRIPE_SECRET_KEY）')
 
@@ -227,11 +266,12 @@ def stripe_confirm(request):
 
 @api_view(['POST'])
 def stripe_webhook(request):
-    webhook_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
+    cfg = _get_payment_settings()
+    webhook_secret = cfg.get('stripe_webhook_secret')
     if not webhook_secret:
         return APIResponse(code=1, msg='Stripe 未配置（缺少 STRIPE_WEBHOOK_SECRET）')
 
-    stripe_key = os.getenv('STRIPE_SECRET_KEY')
+    stripe_key = cfg.get('stripe_key')
     if not stripe_key:
         return APIResponse(code=1, msg='Stripe 未配置（缺少 STRIPE_SECRET_KEY）')
     stripe.api_key = stripe_key
@@ -294,11 +334,15 @@ def paypal_create_order(request):
     if order.status != 'pending':
         return APIResponse(code=1, msg='订单状态不允许支付')
 
-    s = ShopSettings.get_solo()
-    if s and s.enable_paypal != '1':
+    cfg = _get_payment_settings()
+    if cfg.get('enable_paypal') != '1':
         return APIResponse(code=1, msg='PayPal 已在后台关闭')
 
-    token, err = _paypal_get_access_token()
+    token, err = _paypal_get_access_token(
+        client_id=cfg.get('paypal_client_id'),
+        client_secret=cfg.get('paypal_client_secret'),
+        paypal_env=cfg.get('paypal_env'),
+    )
     if err:
         return APIResponse(code=1, msg=err)
 
@@ -306,7 +350,7 @@ def paypal_create_order(request):
     if not public_base:
         return APIResponse(code=1, msg='缺少 PUBLIC_BASE_URL')
 
-    api_base = _paypal_api_base()
+    api_base = _paypal_api_base(cfg.get('paypal_env'))
 
     payment = Payment.objects.create(order=order, provider='paypal', status='created')
 
@@ -362,14 +406,14 @@ def paypal_create_order(request):
 @api_view(['POST'])
 def paypal_capture(request):
     order_no = request.data.get('orderNo')
-    token = request.data.get('token')
+    q = request.data.get('q')
     paypal_order_id = request.data.get('paypalOrderId')
 
-    if not order_no or not token or not paypal_order_id:
-        return APIResponse(code=1, msg='orderNo/token/paypalOrderId不能为空')
+    if not order_no or not q or not paypal_order_id:
+        return APIResponse(code=1, msg='orderNo/q/paypalOrderId不能为空')
 
     try:
-        order = Order.objects.get(order_no=order_no, query_token=token)
+        order = Order.objects.get(order_no=order_no, query_token=q)
     except Order.DoesNotExist:
         return APIResponse(code=1, msg='订单不存在或token不正确')
 
@@ -377,11 +421,16 @@ def paypal_capture(request):
     if order.status == 'paid':
         return APIResponse(code=0, msg='确认成功', data={'orderNo': order.order_no, 'status': order.status})
 
-    token, err = _paypal_get_access_token()
+    cfg = _get_payment_settings()
+    token, err = _paypal_get_access_token(
+        client_id=cfg.get('paypal_client_id'),
+        client_secret=cfg.get('paypal_client_secret'),
+        paypal_env=cfg.get('paypal_env'),
+    )
     if err:
         return APIResponse(code=1, msg=err)
 
-    api_base = _paypal_api_base()
+    api_base = _paypal_api_base(cfg.get('paypal_env'))
     resp = requests.post(
         f"{api_base}/v2/checkout/orders/{paypal_order_id}/capture",
         headers={'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'},
