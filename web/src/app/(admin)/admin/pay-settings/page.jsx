@@ -20,6 +20,29 @@ export default function Page() {
     }
   };
 
+  const openStripeApiKeys = () => {
+    window.open('https://dashboard.stripe.com/apikeys', '_blank', 'noopener,noreferrer');
+  };
+
+  const openStripeWebhooks = () => {
+    window.open('https://dashboard.stripe.com/webhooks', '_blank', 'noopener,noreferrer');
+  };
+
+  const openPayPalApps = () => {
+    window.open('https://developer.paypal.com/developer/applications', '_blank', 'noopener,noreferrer');
+  };
+
+  const copyStripeWebhookUrl = async () => {
+    const base = (process.env.NEXT_PUBLIC_DJANGO_BASE_URL || '').replace(/\/$/, '') || window.location.origin;
+    const url = `${base}/myapp/shop/pay/stripe/webhook`;
+    try {
+      await navigator.clipboard.writeText(url);
+      message.success('Webhook 地址已复制');
+    } catch (e) {
+      message.error('复制失败，请手动复制');
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -151,6 +174,12 @@ export default function Page() {
               </Space>
             </div>
 
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={openStripeApiKeys}>打开 Stripe API Keys</Button>
+              <Button onClick={openStripeWebhooks}>打开 Stripe Webhooks</Button>
+              <Button onClick={copyStripeWebhookUrl}>复制 Webhook 地址</Button>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <div className="text-xs text-gray-500 mb-1">Stripe Secret Key</div>
@@ -194,6 +223,10 @@ export default function Page() {
                 <Button onClick={testPayPal}>测试连接</Button>
                 <Button danger onClick={clearPayPalClient}>清空 Client</Button>
               </Space>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={openPayPalApps}>打开 PayPal My Apps & Credentials</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
