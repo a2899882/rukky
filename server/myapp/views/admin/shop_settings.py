@@ -51,7 +51,7 @@ def get_api(request):
         'enablePayPal': s.enable_paypal,
         'defaultCurrency': s.default_currency,
         'defaultShippingFee': str(s.default_shipping_fee),
-        'homeThemeId': getattr(s, 'home_theme_id', '010'),
+        'homeThemeId': getattr(s, 'home_theme_id', None) or '001',
         'stripeConfigured': bool(os.getenv('STRIPE_SECRET_KEY')),
         'paypalConfigured': bool(os.getenv('PAYPAL_CLIENT_ID')) and bool(os.getenv('PAYPAL_CLIENT_SECRET')),
         'paypalEnv': os.getenv('PAYPAL_ENV') or 'sandbox',

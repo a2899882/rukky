@@ -53,7 +53,7 @@ export default async function RootLayout({children}) {
     const {navSectionData, footerSectionData, homeThemeId} = sectionData;
     
     // 获取模板id（优先使用后台设置）
-    const templateId = homeThemeId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '010';
+    const templateId = homeThemeId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
     
     // 获取当前模板的字体
     const font = getTemplateFont(templateId);

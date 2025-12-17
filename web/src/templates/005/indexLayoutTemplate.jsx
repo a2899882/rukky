@@ -1,5 +1,6 @@
 import ScrollBar from '@/components/index/sections/scrollBar';
 import SendMessage from '@/components/index/sections/sendMessage';
+import SwitchLangB from '@/components/index/sections/switchLangB';
 
 export default function IndexLayoutTemplate({ navSectionData, footerSectionData, children }) {
   const safeNavSectionData = navSectionData || {
@@ -67,6 +68,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
 
       <ScrollBar />
       <SendMessage />
+      <SwitchLangB colorClass="bg-gray-950 text-white px-4 py-2 border-[1px] border-white/20 rounded-full shadow-sm" />
     </div>
   );
 }

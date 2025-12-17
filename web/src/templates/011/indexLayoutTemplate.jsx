@@ -1,6 +1,7 @@
 import ScrollBar from '@/components/index/sections/scrollBar';
 import SendMessage from '@/components/index/sections/sendMessage';
 import TipBar from '@/components/index/sections/tipbar';
+import SwitchLangB from '@/components/index/sections/switchLangB';
 
 export default function IndexLayoutTemplate({ navSectionData, footerSectionData, children }) {
   const safeNavSectionData = navSectionData || {
@@ -81,6 +82,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
       <ScrollBar />
       <SendMessage />
       <TipBar sectionData={safeNavSectionData} />
+      <SwitchLangB />
     </div>
   );
 }

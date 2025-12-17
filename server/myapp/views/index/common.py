@@ -27,12 +27,16 @@ def section(request):
     获取导航和页脚数据的接口
     """
     if request.method == 'GET':
+        no_cache_headers = {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma': 'no-cache',
+        }
         # 使用请求相关缓存键
         cache_key = f"section_view:{request.get_full_path()}"
         cached_data = cache.get(cache_key)
 
         if cached_data:
-            return APIResponse(code=0, msg='查询成功', data=cached_data)
+            return APIResponse(code=0, msg='查询成功', data=cached_data, headers=no_cache_headers)
 
         # 获取所有需要的数据
         basicSite = BasicSite.get_solo()
@@ -172,7 +176,12 @@ def section(request):
             "homeThemeId": home_theme_id,
         }
 
-        # 缓存数据
-        cache.set(cache_key, data, 3600)  # 缓存3600秒
+        # 缓存数据（TTL 不宜过长，否则在 CDN/代理缓存介入时更容易出现主题回退）
+        cache.set(cache_key, data, 60)  # 缓存60秒
 
-        return APIResponse(code=0, msg='查询成功', data=data)
+        return APIResponse(
+            code=0,
+            msg='查询成功',
+            data=data,
+            headers=no_cache_headers,
+        )
