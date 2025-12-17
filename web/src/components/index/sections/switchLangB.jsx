@@ -31,10 +31,20 @@ export default function SwitchLangB({colorClass="bg-white text-gray-500 px-4 py-
 
     const supportedCodes = new Set(languages.map((l) => l.code));
 
+    const getCookieLang = () => {
+        try {
+            const m = document.cookie.match(/(?:^|; )lang=([^;]*)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // 初始化当前语言
     useEffect(() => {
         try {
-            const v = localStorage.getItem('lang') || 'en';
+            const cookieLang = getCookieLang();
+            const v = cookieLang || localStorage.getItem('lang') || 'en';
             setCurrentLanguage(supportedCodes.has(v) ? v : 'en');
         } catch (e) {
             setCurrentLanguage('en');

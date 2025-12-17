@@ -102,6 +102,15 @@ const ja = {
     CompanyNews: "会社ニュース",
     NewsAndEvents: "ニュース & イベント",
     CompanyNewsTip: "専門家のアドバイスでビジネス成長を学びましょう。",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "デモ用ブロックはそのまま使えます。画像と文言をあなたの内容に置き換えてください。",
+    demo_explore_products: "商品を見る",
+    demo_contact_sales: "営業に連絡",
+    demo_shop_now: "今すぐ購入",
+    demo_view_cart: "カートを見る",
+    demo_view_catalog: "カタログを見る",
+    demo_about_us: "会社概要",
 };
 
 export default ja;

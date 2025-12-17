@@ -105,6 +105,11 @@ const items = [
         icon: <SettingOutlined />,
       },
       {
+        key: adminPath('/i18n'),
+        label: '多语言翻译',
+        icon: <SettingOutlined />,
+      },
+      {
         key: adminPath('/user'),
         label: '账号管理',
         icon: <UserOutlined />,

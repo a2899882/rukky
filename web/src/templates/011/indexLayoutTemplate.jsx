@@ -4,6 +4,7 @@ import TipBar from '@/components/index/sections/tipbar';
 import SwitchLangB from '@/components/index/sections/switchLangB';
 
 export default function IndexLayoutTemplate({ navSectionData, footerSectionData, children }) {
+  const lang = require('@/locales').default;
   const safeNavSectionData = navSectionData || {
     basicSite: {},
     basicGlobal: {},
@@ -33,7 +34,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
           <nav className="hidden md:flex items-center gap-7 text-sm">
             {(safeNavSectionData?.navigationItems || []).map((it) => (
               <a key={it.href} href={it.href} className="text-gray-700 hover:text-gray-900">
-                {it.name}
+                {lang?.[it.name] || it.name}
               </a>
             ))}
           </nav>
@@ -42,7 +43,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
             href="/product"
             className="px-4 py-2 rounded-full bg-[hsl(var(--main-color-normal))] text-white text-sm font-semibold"
           >
-            Shop
+            {lang?.Product || 'Shop'}
           </a>
         </div>
       </header>
@@ -57,17 +58,17 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
               <div className="text-sm text-gray-600 mt-2">Premium theme demo layout.</div>
             </div>
             <div>
-              <div className="font-semibold text-gray-900">Links</div>
+              <div className="font-semibold text-gray-900">{lang?.Navigation || 'Links'}</div>
               <div className="mt-3 flex flex-col gap-2 text-sm">
                 {(safeFooterSectionData?.navData || []).map((it) => (
                   <a key={it.href} href={it.href} className="text-gray-600 hover:text-gray-900">
-                    {it.name}
+                    {lang?.[it.name] || it.name}
                   </a>
                 ))}
               </div>
             </div>
             <div>
-              <div className="font-semibold text-gray-900">Contact</div>
+              <div className="font-semibold text-gray-900">{lang?.Contact || 'Contact'}</div>
               <div className="text-sm text-gray-600 mt-3">
                 {safeFooterSectionData?.contactData?.global_email || 'demo@example.com'}
               </div>

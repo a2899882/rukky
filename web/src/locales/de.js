@@ -102,6 +102,15 @@ const de = {
     CompanyNews: "Unternehmensnews",
     NewsAndEvents: "News & Events",
     CompanyNewsTip: "Lernen Sie, wie Sie Ihr Geschäft mit unseren Tipps ausbauen.",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "Demo-Blöcke sind sofort einsatzbereit. Ersetzen Sie Bilder und Texte durch Ihre Inhalte.",
+    demo_explore_products: "Produkte entdecken",
+    demo_contact_sales: "Vertrieb kontaktieren",
+    demo_shop_now: "Jetzt einkaufen",
+    demo_view_cart: "Warenkorb ansehen",
+    demo_view_catalog: "Katalog ansehen",
+    demo_about_us: "Über uns",
 };
 
 export default de;

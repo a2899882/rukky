@@ -26,16 +26,43 @@ const DICTS = {
     vi,
 };
 
-const getLangCode = () => {
-    if (typeof window === 'undefined') {
-        return 'en';
+const getCookieLang = () => {
+    if (typeof window !== 'undefined') {
+        try {
+            const m = document.cookie.match(/(?:^|; )lang=([^;]*)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        } catch (e) {
+            return null;
+        }
     }
+
     try {
-        const v = localStorage.getItem('lang') || 'en';
-        return DICTS[v] ? v : 'en';
+        // next/headers only works in Server Components / Route Handlers
+        // eslint-disable-next-line global-require
+        const { cookies } = require('next/headers');
+        const v = cookies().get('lang')?.value;
+        return v ? decodeURIComponent(v) : null;
     } catch (e) {
-        return 'en';
+        return null;
     }
+}
+
+const getLangCode = () => {
+    const cookieLang = getCookieLang();
+    if (cookieLang && DICTS[cookieLang]) {
+        return cookieLang;
+    }
+
+    if (typeof window !== 'undefined') {
+        try {
+            const v = localStorage.getItem('lang') || 'en';
+            return DICTS[v] ? v : 'en';
+        } catch (e) {
+            return 'en';
+        }
+    }
+
+    return 'en';
 }
 
 // 多语言（按需动态读取，默认 en）

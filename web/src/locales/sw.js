@@ -102,6 +102,15 @@ const sw = {
     CompanyNews: "Habari za kampuni",
     NewsAndEvents: "Habari na matukio",
     CompanyNewsTip: "Jifunze kukuza biashara yako kwa ushauri wetu.",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "Vitalu vya demo viko tayari. Badilisha picha na maandishi kwa maudhui yako.",
+    demo_explore_products: "Chunguza bidhaa",
+    demo_contact_sales: "Wasiliana na mauzo",
+    demo_shop_now: "Nunua sasa",
+    demo_view_cart: "Tazama toroli",
+    demo_view_catalog: "Tazama katalogi",
+    demo_about_us: "Kuhusu sisi",
 };
 
 export default sw;

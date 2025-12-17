@@ -102,6 +102,15 @@ const vi = {
     CompanyNews: "Tin tức công ty",
     NewsAndEvents: "Tin tức & Sự kiện",
     CompanyNewsTip: "Học cách phát triển kinh doanh với lời khuyên của chúng tôi.",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "Các khối demo sẵn sàng sử dụng. Hãy thay hình ảnh và nội dung bằng của bạn.",
+    demo_explore_products: "Khám phá sản phẩm",
+    demo_contact_sales: "Liên hệ bán hàng",
+    demo_shop_now: "Mua ngay",
+    demo_view_cart: "Xem giỏ hàng",
+    demo_view_catalog: "Xem каталог sản phẩm",
+    demo_about_us: "Về chúng tôi",
 };
 
 export default vi;

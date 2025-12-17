@@ -3,6 +3,7 @@ import SendMessage from '@/components/index/sections/sendMessage';
 import SwitchLangB from '@/components/index/sections/switchLangB';
 
 export default function IndexLayoutTemplate({ navSectionData, footerSectionData, children }) {
+  const lang = require('@/locales').default;
   const safeNavSectionData = navSectionData || {
     basicSite: {},
     basicGlobal: {},
@@ -32,7 +33,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
           <nav className="hidden md:flex items-center gap-6 text-sm">
             {(safeNavSectionData?.navigationItems || []).map((it) => (
               <a key={it.href} href={it.href} className="text-white/70 hover:text-white">
-                {it.name}
+                {lang?.[it.name] || it.name}
               </a>
             ))}
           </nav>
@@ -41,7 +42,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
             href="/product"
             className="px-4 py-2 bg-[hsl(var(--main-color-normal))] text-gray-950 text-sm font-semibold"
           >
-            Shop
+            {lang?.Product || 'Shop'}
           </a>
         </div>
       </header>
@@ -58,7 +59,7 @@ export default function IndexLayoutTemplate({ navSectionData, footerSectionData,
             <div className="flex gap-4">
               {(safeFooterSectionData?.navData || []).slice(0, 4).map((it) => (
                 <a key={it.href} href={it.href} className="hover:text-white">
-                  {it.name}
+                  {lang?.[it.name] || it.name}
                 </a>
               ))}
             </div>

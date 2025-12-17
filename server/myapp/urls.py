@@ -86,6 +86,10 @@ urlpatterns = [
     path('admin/media/list', views.admin.media.list_api),
     path('admin/media/delete', views.admin.media.delete_api),
 
+    path('admin/i18n/list', views.admin.i18n.list_api),
+    path('admin/i18n/upsert', views.admin.i18n.upsert),
+    path('admin/i18n/delete', views.admin.i18n.delete),
+
 
     # 前台管理api
     path('index/thing/section', views.index.thing.section),

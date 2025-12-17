@@ -3,6 +3,7 @@ from django.db.models import Q
 from rest_framework.decorators import api_view
 
 from myapp.handler import APIResponse
+from myapp.i18n import apply_translations_for_list, apply_translations_for_obj, get_lang_from_request
 from myapp.models import BasicSite, Category, BasicGlobal, ShopSettings
 from myapp.serializers import BasicGlobalSerializer, BasicSiteSerializer
 
@@ -27,12 +28,13 @@ def section(request):
     获取导航和页脚数据的接口
     """
     if request.method == 'GET':
+        lang = get_lang_from_request(request)
         no_cache_headers = {
             'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
             'Pragma': 'no-cache',
         }
         # 使用请求相关缓存键
-        cache_key = f"section_view:{request.get_full_path()}"
+        cache_key = f"section_view:{request.get_full_path()}|lang={lang}"
         cached_data = cache.get(cache_key)
 
         if cached_data:
@@ -78,18 +80,44 @@ def section(request):
                 )
 
         # 构建导航数据
+        basic_site_data = BasicSiteSerializer(basicSite).data
+        basic_global_data = BasicGlobalSerializer(basicGlobal).data
+
+        apply_translations_for_obj(
+            lang,
+            'BasicSite',
+            basic_site_data,
+            fields=['site_name', 'site_nickname', 'site_address', 'site_copyright'],
+            object_id=str(getattr(basicSite, 'id', '') or ''),
+        )
+        apply_translations_for_obj(
+            lang,
+            'BasicGlobal',
+            basic_global_data,
+            fields=['global_company_name', 'global_email', 'global_address', 'global_phone'],
+            object_id=str(getattr(basicGlobal, 'id', '') or ''),
+        )
+
         nav_data = {
-            'basicSite': BasicSiteSerializer(basicSite).data,
-            'basicGlobal': BasicGlobalSerializer(basicGlobal).data,
+            'basicSite': basic_site_data,
+            'basicGlobal': basic_global_data,
             'navigationItems': []
         }
 
         # 添加首页
         nav_data['navigationItems'].append(create_nav_item("Home", "/"))
 
-        # 将分类数据转换为前端所需的格式
+        # 将分类数据转换为前端所需的格式（先翻译 title 再映射到 name）
+        parent_category_list = list(parent_categories.values())
+        apply_translations_for_list(lang, 'Category', parent_category_list, fields=['title'], id_key='id')
+
+        child_category_list = []
+        for _pid, children in child_categories.items():
+            child_category_list.extend(children)
+        apply_translations_for_list(lang, 'Category', child_category_list, fields=['title'], id_key='id')
+
         formatted_categories = []
-        for parent in parent_categories.values():
+        for parent in parent_category_list:
             parent_item = {
                 'id': parent['id'],
                 'name': parent['title'],
@@ -135,13 +163,13 @@ def section(request):
         # 构建页脚数据
         footer_data = {
             'navData': [create_nav_item("Home", "/", "link")],
-            'contactData': BasicGlobalSerializer(basicGlobal).data,
+            'contactData': basic_global_data,
             'categoryData': [],
-            'basicSite': BasicSiteSerializer(basicSite).data
+            'basicSite': basic_site_data
         }
 
         # 为页脚准备分类数据
-        for parent in list(parent_categories.values())[:6]:
+        for parent in parent_category_list[:6]:
             footer_category = {
                 'id': parent['id'],
                 'pid': -1,

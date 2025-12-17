@@ -12,10 +12,10 @@
   return (
     <div className="bg-white">
       <section className="relative">
-        <img src={hero} alt="Hero" className="w-full h-[340px] md:h-[480px] object-cover" />
+        <img src={hero} alt="Hero" className="w-full h-[260px] sm:h-[340px] md:h-[480px] object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/40 to-transparent" />
         <div className="absolute inset-0">
-          <div className="max-w-7xl mx-auto px-6 h-full flex items-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center">
             <div className="max-w-2xl">
               <div className="text-xs tracking-widest uppercase text-gray-700">Theme 011 · Premium</div>
               <div className="text-3xl md:text-5xl font-bold text-gray-900 mt-3">
@@ -24,11 +24,11 @@
               <div className="text-gray-700 mt-4">
                 {lang?.demo_theme_desc || 'Elegant spacing, soft gradients, and a premium feel. Swap content from admin without code.'}
               </div>
-              <div className="mt-6 flex gap-3">
-                <a href="/product" className="px-5 py-3 bg-[hsl(var(--main-color-normal))] text-white font-semibold">
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <a href="/product" className="px-5 py-3 text-center bg-[hsl(var(--main-color-normal))] text-white font-semibold">
                   {lang?.demo_view_catalog || 'View Catalog'}
                 </a>
-                <a href="/about" className="px-5 py-3 border border-gray-200 text-gray-800 font-medium">
+                <a href="/about" className="px-5 py-3 text-center border border-gray-200 text-gray-800 font-medium">
                   {lang?.demo_about_us || 'About Us'}
                 </a>
               </div>
@@ -37,24 +37,24 @@
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           {[
             { t: 'Premium visuals', d: 'Designed for brand perception.' },
             { t: 'Clean layout', d: 'Readable typography and spacing.' },
             { t: 'Conversion ready', d: 'CTA blocks and trust signals.' },
           ].map((x) => (
-            <div key={x.t} className="border border-gray-100 p-6">
+            <div key={x.t} className="border border-gray-100 p-4 sm:p-6">
               <div className="font-semibold text-gray-900">{x.t}</div>
               <div className="text-sm text-gray-600 mt-2">{x.d}</div>
             </div>
           ))}
         </div>
 
-        <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-8 sm:mt-10 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="border border-gray-100 p-6">
             <div className="font-semibold text-gray-900">Editorial photo block (Unsplash hotlink)</div>
-            <img src={u1} alt="Demo" className="mt-4 w-full h-64 object-cover" />
+            <img src={u1} alt="Demo" className="mt-4 w-full h-44 sm:h-64 object-cover" />
           </div>
           <div className="border border-gray-100 p-6">
             <div className="font-semibold text-gray-900">Brand Story</div>

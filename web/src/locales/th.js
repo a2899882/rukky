@@ -102,6 +102,15 @@ const th = {
     CompanyNews: "ข่าวสารบริษัท",
     NewsAndEvents: "ข่าว & กิจกรรม",
     CompanyNewsTip: "เรียนรู้การเติบโตธุรกิจจากคำแนะนำของเรา",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "บล็อกตัวอย่างพร้อมใช้งาน เปลี่ยนรูปและข้อความเป็นของคุณได้ทันที",
+    demo_explore_products: "ดูสินค้า",
+    demo_contact_sales: "ติดต่อฝ่ายขาย",
+    demo_shop_now: "ช้อปเลย",
+    demo_view_cart: "ดูตะกร้า",
+    demo_view_catalog: "ดูแคตตาล็อก",
+    demo_about_us: "เกี่ยวกับเรา",
 };
 
 export default th;

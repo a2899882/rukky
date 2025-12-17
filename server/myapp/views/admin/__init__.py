@@ -23,3 +23,4 @@ from myapp.views.admin.opLog import *
 from myapp.views.admin.errorLog import *
 from myapp.views.admin.cdn import *
 from myapp.views.admin.media import *
+from myapp.views.admin.i18n import *

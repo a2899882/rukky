@@ -102,6 +102,15 @@ const ar = {
     CompanyNews: "أخبار الشركة",
     NewsAndEvents: "الأخبار والفعاليات",
     CompanyNewsTip: "تعلم كيف تنمّي أعمالك بنصائحنا.",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "كتل عرض جاهزة للاستخدام. استبدل الصور والنصوص بمحتواك.",
+    demo_explore_products: "استكشف المنتجات",
+    demo_contact_sales: "تواصل مع المبيعات",
+    demo_shop_now: "تسوق الآن",
+    demo_view_cart: "عرض السلة",
+    demo_view_catalog: "عرض الكتالوج",
+    demo_about_us: "من نحن",
 };
 
 export default ar;

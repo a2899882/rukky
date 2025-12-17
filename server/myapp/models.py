@@ -538,3 +538,24 @@ class ErrorLog(models.Model):
 
     class Meta:
         db_table = "b_error_log"
+
+
+class I18nText(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    model = models.CharField(max_length=50)  # e.g. Category/News/Case/Thing/BasicSite
+    object_id = models.CharField(max_length=32)  # keep string to support singleton ids
+    field = models.CharField(max_length=50)  # e.g. title/summary/description
+    lang = models.CharField(max_length=16)  # e.g. en/zh/zh-TW
+    value = models.TextField(blank=True, null=True)
+    update_time = models.DateTimeField(auto_now=True, null=True)
+    create_time = models.DateTimeField(auto_now_add=True, null=True)
+
+    class Meta:
+        db_table = "b_i18n_text"
+        constraints = [
+            models.UniqueConstraint(fields=['model', 'object_id', 'field', 'lang'], name='uniq_i18n_text_key')
+        ]
+        indexes = [
+            models.Index(fields=['model', 'object_id'], name='idx_i18n_obj'),
+            models.Index(fields=['lang'], name='idx_i18n_lang'),
+        ]

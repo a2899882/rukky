@@ -102,6 +102,15 @@ const zhTw = {
     CompanyNews: "公司新聞",
     NewsAndEvents: "新聞與活動",
     CompanyNewsTip: "透過我們的建議，了解如何發展您的業務。",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "示範模組已就緒，只要替換圖片與文案即可快速上線。",
+    demo_explore_products: "瀏覽產品",
+    demo_contact_sales: "聯絡銷售",
+    demo_shop_now: "立即選購",
+    demo_view_cart: "查看購物車",
+    demo_view_catalog: "查看目錄",
+    demo_about_us: "關於我們",
 };
 
 export default zhTw;

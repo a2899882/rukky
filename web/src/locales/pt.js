@@ -102,6 +102,15 @@ const pt = {
     CompanyNews: "Notícias da empresa",
     NewsAndEvents: "Notícias e eventos",
     CompanyNewsTip: "Aprenda a crescer seu negócio com nossas dicas.",
+
+    // Demo theme (001/005/011)
+    demo_theme_desc: "Blocos de demonstração prontos. Substitua imagens e textos pelo seu conteúdo.",
+    demo_explore_products: "Explorar produtos",
+    demo_contact_sales: "Falar com vendas",
+    demo_shop_now: "Comprar agora",
+    demo_view_cart: "Ver carrinho",
+    demo_view_catalog: "Ver catálogo",
+    demo_about_us: "Sobre nós",
 };
 
 export default pt;

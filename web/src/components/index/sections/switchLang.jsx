@@ -6,6 +6,7 @@ export default function SwitchLang({
                                        colorClass = "ml-2 bg-white text-gray-500 px-2 py-1.5 rounded-full ",
                                    }) {
     const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+    const [currentLanguage, setCurrentLanguage] = useState('en');
     const [mounted, setMounted] = useState(false);
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
@@ -17,13 +18,39 @@ export default function SwitchLang({
         {code: 'zh', name: '中文'},
     ];
 
+    const supportedCodes = new Set(languages.map((l) => l.code));
+
+    const getCookieLang = () => {
+        try {
+            const m = document.cookie.match(/(?:^|; )lang=([^;]*)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     const setLang = (code) => {
         try {
             localStorage.setItem('lang', code);
         } catch (e) {
         }
+        try {
+            document.cookie = `lang=${encodeURIComponent(code)}; Path=/; Max-Age=31536000; SameSite=Lax`;
+        } catch (e) {
+        }
         window.location.reload();
     }
+
+    useEffect(() => {
+        try {
+            const cookieLang = getCookieLang();
+            const v = cookieLang || localStorage.getItem('lang') || 'en';
+            setCurrentLanguage(supportedCodes.has(v) ? v : 'en');
+        } catch (e) {
+            setCurrentLanguage('en');
+        }
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         let timeoutId;
