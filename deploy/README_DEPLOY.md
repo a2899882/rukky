@@ -1,5 +1,31 @@
 # 部署说明（Debian 12/13 + Docker + FinalShell）
 
+## 0. 新服务器首次部署（最短稳定流程）
+
+说明：本项目使用 Docker Compose 部署，服务名固定为：`db / api / web / nginx`。
+
+```bash
+# 1) 安装 Docker + compose（Debian/Ubuntu）
+apt update
+apt -y install ca-certificates curl git
+curl -fsSL https://get.docker.com | bash
+apt -y install docker-compose-plugin
+
+# 2) 拉代码
+mkdir -p /opt
+cd /opt
+git clone https://github.com/a2899882/rukky.git boutiquemark-shop
+cd /opt/boutiquemark-shop
+
+# 3) 创建 .env（按你的真实值填写）
+# 建议：直接把已有服务器的 /opt/boutiquemark-shop/.env 复制到新服务器，然后只改域名/密码
+
+# 4) 启动并迁移
+docker-compose -f docker-compose.yml up -d --build db api web nginx
+docker-compose -f docker-compose.yml exec api python manage.py migrate
+docker-compose -f docker-compose.yml restart api web nginx
+```
+
 ## 1. 服务器准备
 
 - 推荐路径：`/opt/boutiquemark-shop`
