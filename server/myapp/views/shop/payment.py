@@ -1,5 +1,6 @@
 import json
 import os
+from decimal import Decimal
 
 import requests
 import stripe
@@ -10,6 +11,8 @@ from rest_framework.decorators import api_view
 from myapp.handler import APIResponse
 from myapp.models import Order, Payment, ShopSettings, OrderItem, Thing, ThingSku
 from myapp.crypto import decrypt_text
+from myapp.utils import log_error
+from myapp.utils import rate_limit
 
 
 def _public_base_url():
@@ -133,7 +136,107 @@ def _deduct_inventory_for_order(order_id):
         return True, None
 
 
+def _mark_payment_failed(order_id, provider: str, provider_ref: str = None, msg: str = None, raw_data=None):
+    raw_text = None
+    if raw_data is not None:
+        try:
+            raw_text = json.dumps(raw_data)
+        except Exception:
+            raw_text = str(raw_data)
+
+    if msg:
+        try:
+            raw_obj = {'msg': msg, 'raw': raw_data}
+            raw_text = json.dumps(raw_obj)
+        except Exception:
+            pass
+
+    with transaction.atomic():
+        try:
+            order = Order.objects.select_for_update().get(pk=order_id)
+        except Order.DoesNotExist:
+            return
+
+        qs = Payment.objects.filter(order=order, provider=provider)
+        if provider_ref:
+            qs = qs.filter(provider_ref=provider_ref)
+
+        updated = qs.update(status='failed', raw=raw_text)
+        if updated == 0:
+            if provider_ref:
+                Payment.objects.get_or_create(
+                    order=order,
+                    provider=provider,
+                    provider_ref=provider_ref,
+                    defaults={'status': 'failed', 'raw': raw_text},
+                )
+            else:
+                Payment.objects.get_or_create(
+                    order=order,
+                    provider=provider,
+                    defaults={'status': 'failed', 'raw': raw_text},
+                )
+
+
+def _safe_decimal(value):
+    try:
+        return Decimal(str(value))
+    except Exception:
+        return None
+
+
+def _finalize_paid_order(order_id, provider: str, provider_ref: str = None, raw_data=None):
+    """Idempotent finalization.
+
+    - Lock order row.
+    - Mark payment paid.
+    - Deduct inventory once.
+    - Mark order paid.
+    """
+
+    raw_text = None
+    if raw_data is not None:
+        try:
+            raw_text = json.dumps(raw_data)
+        except Exception:
+            raw_text = str(raw_data)
+
+    with transaction.atomic():
+        order = Order.objects.select_for_update().get(pk=order_id)
+
+        if provider_ref:
+            updated = Payment.objects.filter(order=order, provider=provider, provider_ref=provider_ref).update(status='paid', raw=raw_text)
+            if updated == 0:
+                Payment.objects.get_or_create(
+                    order=order,
+                    provider=provider,
+                    provider_ref=provider_ref,
+                    defaults={'status': 'paid', 'raw': raw_text},
+                )
+        else:
+            updated = Payment.objects.filter(order=order, provider=provider).update(status='paid', raw=raw_text)
+            if updated == 0:
+                Payment.objects.get_or_create(
+                    order=order,
+                    provider=provider,
+                    defaults={'status': 'paid', 'raw': raw_text},
+                )
+
+        if order.status == 'paid':
+            return True, None
+
+        ok, msg = _deduct_inventory_for_order(order.id)
+        # 无论库存扣减成功与否，都保持订单 paid（库存问题交给商家处理）
+        order.status = 'paid'
+        order.save(update_fields=['status', 'update_time'])
+        if not ok:
+            return False, msg or '库存扣减失败'
+
+        return True, None
+
+
 @api_view(['POST'])
+@rate_limit('shop_pay_stripe_create_session', limit=20, window_seconds=60)
 def stripe_create_session(request):
     """Stripe Checkout Session"""
 
@@ -206,6 +309,7 @@ def stripe_create_session(request):
 
 
 @api_view(['POST'])
+@rate_limit('shop_pay_stripe_confirm', limit=30, window_seconds=60)
 def stripe_confirm(request):
     order_no = request.data.get('orderNo')
     token = request.data.get('token')
@@ -247,24 +351,21 @@ def stripe_confirm(request):
     except Exception:
         expected_amount = None
     if currency and currency != order.currency:
+        _mark_payment_failed(order.id, provider='stripe', provider_ref=session_id, msg='币种校验失败', raw_data=session)
         return APIResponse(code=1, msg='币种校验失败')
     if expected_amount is not None and amount_total is not None and int(amount_total) != expected_amount:
+        _mark_payment_failed(order.id, provider='stripe', provider_ref=session_id, msg='金额校验失败', raw_data=session)
         return APIResponse(code=1, msg='金额校验失败')
 
-    Payment.objects.filter(order=order, provider='stripe', provider_ref=session_id).update(status='paid')
-    if order.status != 'paid':
-        ok, msg = _deduct_inventory_for_order(order.id)
-        if not ok:
-            order.status = 'paid'
-            order.save(update_fields=['status', 'update_time'])
-            return APIResponse(code=1, msg=msg or '库存扣减失败，请联系商家处理')
-        order.status = 'paid'
-        order.save(update_fields=['status', 'update_time'])
+    ok, msg = _finalize_paid_order(order.id, provider='stripe', provider_ref=session_id, raw_data=session)
+    if not ok:
+        return APIResponse(code=1, msg=msg or '库存扣减失败，请联系商家处理')
 
     return APIResponse(code=0, msg='确认成功', data={'orderNo': order.order_no, 'status': order.status})
 
 
 @api_view(['POST'])
+@rate_limit('shop_pay_stripe_webhook', limit=120, window_seconds=60)
 def stripe_webhook(request):
     cfg = _get_payment_settings()
     webhook_secret = cfg.get('stripe_webhook_secret')
@@ -282,12 +383,19 @@ def stripe_webhook(request):
     try:
         event = stripe.Webhook.construct_event(payload=payload, sig_header=sig_header, secret=webhook_secret)
     except Exception:
+        try:
+            log_error(request, 'Stripe webhook signature verify failed')
+        except Exception:
+            pass
         return APIResponse(code=1, msg='Webhook signature verify failed', status=400)
 
     if event.get('type') == 'checkout.session.completed':
         session = event['data']['object']
         order_no = (session.get('metadata') or {}).get('order_no') or session.get('client_reference_id')
         session_id = session.get('id')
+
+        if session.get('payment_status') != 'paid':
+            return APIResponse(code=0, msg='ok')
 
         if order_no and session_id:
             try:
@@ -297,26 +405,29 @@ def stripe_webhook(request):
                 amount_total = session.get('amount_total')
                 expected_amount = int(order.total * 100)
                 if currency and currency != order.currency:
+                    _mark_payment_failed(order.id, provider='stripe', provider_ref=session_id, msg='币种校验失败', raw_data=session)
                     return APIResponse(code=1, msg='币种校验失败', status=400)
                 if amount_total is not None and int(amount_total) != expected_amount:
+                    _mark_payment_failed(order.id, provider='stripe', provider_ref=session_id, msg='金额校验失败', raw_data=session)
                     return APIResponse(code=1, msg='金额校验失败', status=400)
 
-                Payment.objects.filter(order=order, provider='stripe', provider_ref=session_id).update(status='paid')
-                if order.status != 'paid':
-                    ok, msg = _deduct_inventory_for_order(order.id)
-                    if not ok:
-                        order.status = 'paid'
-                        order.save(update_fields=['status', 'update_time'])
-                        return APIResponse(code=1, msg=msg or '库存扣减失败', status=400)
-                    order.status = 'paid'
-                    order.save(update_fields=['status', 'update_time'])
+                ok, msg = _finalize_paid_order(order.id, provider='stripe', provider_ref=session_id, raw_data=session)
+                if not ok:
+                    return APIResponse(code=1, msg=msg or '库存扣减失败', status=400)
             except Order.DoesNotExist:
-                pass
+                try:
+                    log_error(request, json.dumps({'msg': 'Stripe webhook order not found', 'orderNo': order_no, 'sessionId': session_id}))
+                except Exception:
+                    try:
+                        log_error(request, 'Stripe webhook order not found')
+                    except Exception:
+                        pass
 
     return APIResponse(code=0, msg='ok')
 
 
 @api_view(['POST'])
+@rate_limit('shop_pay_paypal_create_order', limit=20, window_seconds=60)
 def paypal_create_order(request):
     """PayPal create order"""
 
@@ -404,6 +515,7 @@ def paypal_create_order(request):
 
 
 @api_view(['POST'])
+@rate_limit('shop_pay_paypal_capture', limit=30, window_seconds=60)
 def paypal_capture(request):
     order_no = request.data.get('orderNo')
     q = request.data.get('q')
@@ -420,6 +532,11 @@ def paypal_capture(request):
     # 幂等：已支付直接返回
     if order.status == 'paid':
         return APIResponse(code=0, msg='确认成功', data={'orderNo': order.order_no, 'status': order.status})
+
+    # 防串单：paypalOrderId 必须属于该订单
+    if not Payment.objects.filter(order=order, provider='paypal', provider_ref=paypal_order_id).exists():
+        _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='PayPal 单号不属于该订单')
+        return APIResponse(code=1, msg='PayPal 单号不属于该订单')
 
     cfg = _get_payment_settings()
     token, err = _paypal_get_access_token(
@@ -438,7 +555,7 @@ def paypal_capture(request):
     )
 
     if resp.status_code >= 300:
-        Payment.objects.filter(order=order, provider='paypal', provider_ref=paypal_order_id).update(status='failed', raw=resp.text)
+        _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='PayPal capture failed', raw_data=resp.text)
         return APIResponse(code=1, msg='PayPal capture failed')
 
     data = resp.json()
@@ -450,6 +567,10 @@ def paypal_capture(request):
     # 校验金额/币种（取第一笔 purchase unit）
     try:
         pu = (data.get('purchase_units') or [])[0]
+        ref_id = pu.get('reference_id')
+        if ref_id and str(ref_id) != str(order.order_no):
+            _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='订单号校验失败', raw_data=data)
+            return APIResponse(code=1, msg='订单号校验失败')
         amount = (pu.get('payments') or {}).get('captures')
         if amount:
             cap = amount[0]
@@ -457,21 +578,23 @@ def paypal_capture(request):
             currency_code = (money.get('currency_code') or '').upper()
             value = money.get('value')
             if currency_code and currency_code != order.currency:
+                _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='币种校验失败', raw_data=data)
                 return APIResponse(code=1, msg='币种校验失败')
-            if value is not None and str(value) != str(order.total):
+            paid_amount = _safe_decimal(value)
+            expected = _safe_decimal(order.total)
+            if paid_amount is None or expected is None:
+                _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='金额校验失败', raw_data=data)
+                return APIResponse(code=1, msg='金额校验失败')
+            if paid_amount != expected:
+                _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='金额校验失败', raw_data=data)
                 return APIResponse(code=1, msg='金额校验失败')
     except Exception:
         # 校验失败不直接放行
+        _mark_payment_failed(order.id, provider='paypal', provider_ref=paypal_order_id, msg='PayPal 校验失败', raw_data=data)
         return APIResponse(code=1, msg='PayPal 校验失败')
 
-    Payment.objects.filter(order=order, provider='paypal', provider_ref=paypal_order_id).update(status='paid', raw=json.dumps(data))
-    if order.status != 'paid':
-        ok, msg = _deduct_inventory_for_order(order.id)
-        if not ok:
-            order.status = 'paid'
-            order.save(update_fields=['status', 'update_time'])
-            return APIResponse(code=1, msg=msg or '库存扣减失败，请联系商家处理')
-        order.status = 'paid'
-        order.save(update_fields=['status', 'update_time'])
+    ok, msg = _finalize_paid_order(order.id, provider='paypal', provider_ref=paypal_order_id, raw_data=data)
+    if not ok:
+        return APIResponse(code=1, msg=msg or '库存扣减失败，请联系商家处理')
 
     return APIResponse(code=0, msg='确认成功', data={'orderNo': order.order_no, 'status': order.status})

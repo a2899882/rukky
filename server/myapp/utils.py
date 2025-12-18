@@ -11,6 +11,8 @@ from smtplib import SMTP_SSL
 from django.core.cache import cache
 
 from myapp.serializers import ErrorLogSerializer
+from myapp.serializers import OpLogSerializer
+from myapp.handler import APIResponse
 
 
 def get_timestamp():
@@ -91,6 +93,46 @@ def log_error(request, content):
     serializer = ErrorLogSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
+
+
+def log_op(request, content):
+    re_ip = get_ip(request)
+    re_method = request.method
+    url = request.path
+
+    data = {
+        're_ip': re_ip,
+        're_method': re_method,
+        're_url': url,
+        're_content': (content or '')[0:200],
+    }
+
+    serializer = OpLogSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+
+
+def rate_limit(key_prefix: str, limit: int, window_seconds: int):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped_view(request, *args, **kwargs):
+            ip = get_ip(request)
+            key = f"rl:{key_prefix}:{ip}:{request.path}"
+
+            try:
+                cache.add(key, 0, timeout=window_seconds)
+                count = cache.incr(key)
+            except Exception:
+                return view_func(request, *args, **kwargs)
+
+            if int(count) > int(limit):
+                return APIResponse(code=1, msg='请求过于频繁', status=429)
+
+            return view_func(request, *args, **kwargs)
+
+        return _wrapped_view
+
+    return decorator
 
 
 def clear_cache(request, response):

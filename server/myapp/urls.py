@@ -5,6 +5,7 @@ from myapp import views
 app_name = 'myapp'
 urlpatterns = [
     # 后台管理api
+    path('healthz', views.health.healthz),
     path('admin/overview/count', views.admin.overview.count),
     path('admin/overview/dataCount', views.admin.overview.dataCount),
     path('admin/thing/list', views.admin.thing.list_api),

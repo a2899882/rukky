@@ -9,6 +9,8 @@ from myapp.auth.authentication import AdminTokenAuthtication
 from myapp.handler import APIResponse
 from myapp.models import ShopSettings
 from myapp.crypto import encrypt_text, decrypt_text
+from myapp.utils import log_op
+from myapp.utils import rate_limit
 
 
 def _paypal_api_base(paypal_env: str = None):
@@ -84,6 +86,7 @@ def get_api(request):
 
 @api_view(['POST'])
 @authentication_classes([AdminTokenAuthtication])
+@rate_limit('admin_shop_settings_update', limit=30, window_seconds=60)
 def update_api(request):
     s = ShopSettings.get_solo()
     if not s:
@@ -101,49 +104,69 @@ def update_api(request):
     paypal_client_id = request.data.get('paypalClientId')
     paypal_client_secret = request.data.get('paypalClientSecret')
 
+    changed = []
+
     if enable_stripe in ['1', '2']:
         s.enable_stripe = enable_stripe
+        changed.append(f"enableStripe={enable_stripe}")
     if enable_paypal in ['1', '2']:
         s.enable_paypal = enable_paypal
+        changed.append(f"enablePayPal={enable_paypal}")
     if default_currency in ['USD', 'EUR', 'GBP', 'CNY']:
         s.default_currency = default_currency
+        changed.append(f"defaultCurrency={default_currency}")
     try:
         if default_shipping_fee is not None:
             s.default_shipping_fee = default_shipping_fee
+            changed.append("defaultShippingFee")
     except Exception:
         pass
 
     if home_theme_id in ['001', '005', '010', '011']:
         s.home_theme_id = home_theme_id
+        changed.append(f"homeThemeId={home_theme_id}")
 
     if 'stripeSecretKey' in request.data:
         if stripe_secret_key is not None and str(stripe_secret_key).strip() != '':
             s.stripe_secret_key_enc = encrypt_text(str(stripe_secret_key).strip())
+            changed.append('stripeSecretKey:set')
         elif stripe_secret_key == '':
             s.stripe_secret_key_enc = None
+            changed.append('stripeSecretKey:cleared')
 
     if 'stripeWebhookSecret' in request.data:
         if stripe_webhook_secret is not None and str(stripe_webhook_secret).strip() != '':
             s.stripe_webhook_secret_enc = encrypt_text(str(stripe_webhook_secret).strip())
+            changed.append('stripeWebhookSecret:set')
         elif stripe_webhook_secret == '':
             s.stripe_webhook_secret_enc = None
+            changed.append('stripeWebhookSecret:cleared')
 
     if paypal_env in ['sandbox', 'live']:
         s.paypal_env = paypal_env
+        changed.append(f"paypalEnv={paypal_env}")
 
     if 'paypalClientId' in request.data:
         if paypal_client_id is not None and str(paypal_client_id).strip() != '':
             s.paypal_client_id_enc = encrypt_text(str(paypal_client_id).strip())
+            changed.append('paypalClientId:set')
         elif paypal_client_id == '':
             s.paypal_client_id_enc = None
+            changed.append('paypalClientId:cleared')
 
     if 'paypalClientSecret' in request.data:
         if paypal_client_secret is not None and str(paypal_client_secret).strip() != '':
             s.paypal_client_secret_enc = encrypt_text(str(paypal_client_secret).strip())
+            changed.append('paypalClientSecret:set')
         elif paypal_client_secret == '':
             s.paypal_client_secret_enc = None
+            changed.append('paypalClientSecret:cleared')
 
     s.save()
+    try:
+        log_op(request, f"admin.shop.settings.update: {','.join(changed) if changed else 'no-changes'}")
+    except Exception:
+        pass
     # Invalidate cached frontend sections so homepage theme changes take effect immediately
     cache.delete('section_view:/myapp/index/common/section')
     cache.delete('section_view:/myapp/index/home/section')
@@ -152,6 +175,7 @@ def update_api(request):
 
 @api_view(['POST'])
 @authentication_classes([AdminTokenAuthtication])
+@rate_limit('admin_shop_settings_test_paypal', limit=30, window_seconds=60)
 def test_paypal(request):
     s = ShopSettings.get_solo()
     paypal_env = getattr(s, 'paypal_env', None) or os.getenv('PAYPAL_ENV') or 'sandbox'
@@ -168,16 +192,29 @@ def test_paypal(request):
 
     token, err = _paypal_get_access_token(client_id=client_id, client_secret=client_secret, paypal_env=paypal_env)
     if err:
+        try:
+            log_op(request, f"admin.shop.settings.testPayPal: failed ({err})")
+        except Exception:
+            pass
         return APIResponse(code=1, msg=err)
 
     if not token:
+        try:
+            log_op(request, "admin.shop.settings.testPayPal: failed (empty token)")
+        except Exception:
+            pass
         return APIResponse(code=1, msg='PayPal token 为空')
 
+    try:
+        log_op(request, f"admin.shop.settings.testPayPal: ok (env={paypal_env})")
+    except Exception:
+        pass
     return APIResponse(code=0, msg='连接成功')
 
 
 @api_view(['POST'])
 @authentication_classes([AdminTokenAuthtication])
+@rate_limit('admin_shop_settings_test_stripe', limit=30, window_seconds=60)
 def test_stripe(request):
     s = ShopSettings.get_solo()
     stripe_key = None
@@ -188,12 +225,24 @@ def test_stripe(request):
 
     stripe_key = stripe_key or os.getenv('STRIPE_SECRET_KEY')
     if not stripe_key:
+        try:
+            log_op(request, 'admin.shop.settings.testStripe: failed (not configured)')
+        except Exception:
+            pass
         return APIResponse(code=1, msg='Stripe 未配置（缺少 STRIPE_SECRET_KEY）')
 
     try:
         stripe.api_key = stripe_key
         stripe.Balance.retrieve()
     except Exception:
+        try:
+            log_op(request, 'admin.shop.settings.testStripe: failed')
+        except Exception:
+            pass
         return APIResponse(code=1, msg='Stripe 连接失败')
 
+    try:
+        log_op(request, 'admin.shop.settings.testStripe: ok')
+    except Exception:
+        pass
     return APIResponse(code=0, msg='连接成功')

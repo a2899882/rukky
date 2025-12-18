@@ -1,1 +1,1 @@
-from myapp.views import admin, index, shop
+from myapp.views import admin, index, shop, health

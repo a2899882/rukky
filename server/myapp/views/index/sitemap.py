@@ -62,6 +62,7 @@ def get_static_pages() -> List[Dict]:
         {'loc': '/contact', 'priority': 0.9, 'changefreq': 'weekly'},
         {'loc': '/product', 'priority': 0.9, 'changefreq': 'weekly'},
         {'loc': '/news', 'priority': 0.9, 'changefreq': 'weekly'},
+        {'loc': '/case', 'priority': 0.9, 'changefreq': 'weekly'},
         {'loc': '/faq', 'priority': 0.9, 'changefreq': 'weekly'},
     ]
 
@@ -105,6 +106,17 @@ def section(request):
                 priority=0.9
             )
 
+        # 添加产品分类页（/product/category/[id]）
+        categories = Category.objects.all()
+        for cat in categories:
+            create_url_element(
+                urlset=urlset,
+                loc=f"{base_url}/product/category/{cat.id}",
+                lastmod=cat.create_time.strftime('%Y-%m-%d') if getattr(cat, 'create_time', None) else None,
+                changefreq='weekly',
+                priority=0.7
+            )
+
         # 添加新闻页面
         news = News.objects.filter(status='0')
         for item in news:
@@ -114,6 +126,17 @@ def section(request):
                 lastmod=item.create_time.strftime('%Y-%m-%d') if item.create_time else current_date,
                 changefreq='weekly',
                 priority=0.9
+            )
+
+        # 添加案例详情页（/case/[id]）
+        cases = Case.objects.filter(status='0')
+        for item in cases:
+            create_url_element(
+                urlset=urlset,
+                loc=f"{base_url}/case/{item.id}",
+                lastmod=item.create_time.strftime('%Y-%m-%d') if item.create_time else current_date,
+                changefreq='weekly',
+                priority=0.8
             )
 
         # 生成XML字符串
