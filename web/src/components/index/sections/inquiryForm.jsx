@@ -1,7 +1,8 @@
 'use client'
 import React from 'react';
 import api from "@/utils/axiosApi";
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -14,10 +15,15 @@ import {
 
 
 const InquiryForm = () => {
+    const searchParams = useSearchParams();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         tel: '',
+        company: '',
+        country: '',
+        quantity: '',
+        preferred_contact: '',
         message: ''
     });
     const [loading, setLoading] = useState(false);
@@ -49,6 +55,38 @@ const InquiryForm = () => {
         setAlertState(prev => ({ ...prev, open: false }));
     };
 
+    useEffect(() => {
+        try {
+            const product = searchParams?.get('inquiryProduct') || '';
+            const productId = searchParams?.get('inquiryProductId') || '';
+            const sku = searchParams?.get('inquirySku') || '';
+            const url = searchParams?.get('inquiryUrl') || '';
+            const orderNo = searchParams?.get('inquiryOrderNo') || '';
+            const token = searchParams?.get('inquiryToken') || '';
+
+            const parts = [];
+            if (product || sku || url) {
+                parts.push(`Hi, I'm interested in: ${product || ''}${productId ? ` (ID: ${productId})` : ''}`);
+                if (sku) parts.push(`SKU/Variant: ${sku}`);
+                if (url) parts.push(`Product URL: ${url}`);
+            }
+            if (orderNo || token) {
+                parts.push('---');
+                if (orderNo) parts.push(`Order No: ${orderNo}`);
+                if (token) parts.push(`Query Token: ${token}`);
+            }
+
+            const prefill = parts.join('\n');
+            if (prefill) {
+                setFormData((prev) => {
+                    if (prev.message && String(prev.message).trim()) return prev;
+                    return { ...prev, message: prefill };
+                });
+            }
+        } catch (e) {
+        }
+    }, [searchParams]);
+
     const sendInquiryData = async (e) => {
         e.preventDefault();
 
@@ -70,17 +108,26 @@ const InquiryForm = () => {
             const submitData = new FormData();
             submitData.append('name', formData.name);
             submitData.append('email', formData.email);
+            submitData.append('tel', formData.tel);
+            submitData.append('company', formData.company);
+            submitData.append('country', formData.country);
+            submitData.append('quantity', formData.quantity);
+            submitData.append('preferred_contact', formData.preferred_contact);
             submitData.append('message', formData.message);
 
             const { code, msg } = await api.post('/myapp/index/inquiry/create', submitData);
 
             if (code === 0) {
-                showAlert('Submission Successful', 'We will contact you as soon as possible', 'default');
+                showAlert('Submission Successful', 'Thanks! We will contact you within 1-2 business days.', 'default');
                 // 重置表单
                 setFormData({
                     name: '',
                     email: '',
                     tel: '',
+                    company: '',
+                    country: '',
+                    quantity: '',
+                    preferred_contact: '',
                     message: ''
                 });
             } else {
@@ -144,6 +191,75 @@ const InquiryForm = () => {
                         />
                     </div>
                     <div>
+                        <label className="block text-sm mb-2 text-gray-600" htmlFor="tel">
+                            Phone
+                        </label>
+                        <input
+                            type="tel"
+                            id="tel"
+                            value={formData.tel}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 rounded-md bg-gray-50 text-gray-800 border border-gray-200 transition focus:outline-none"
+                            placeholder="Your Phone (optional)"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm mb-2 text-gray-600" htmlFor="company">
+                            Company
+                        </label>
+                        <input
+                            type="text"
+                            id="company"
+                            value={formData.company}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 rounded-md bg-gray-50 text-gray-800 border border-gray-200 transition focus:outline-none"
+                            placeholder="Your Company (optional)"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm mb-2 text-gray-600" htmlFor="country">
+                            Country/Region
+                        </label>
+                        <input
+                            type="text"
+                            id="country"
+                            value={formData.country}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 rounded-md bg-gray-50 text-gray-800 border border-gray-200 transition focus:outline-none"
+                            placeholder="Your Country (optional)"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm mb-2 text-gray-600" htmlFor="quantity">
+                            Quantity
+                        </label>
+                        <input
+                            type="text"
+                            id="quantity"
+                            value={formData.quantity}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 rounded-md bg-gray-50 text-gray-800 border border-gray-200 transition focus:outline-none"
+                            placeholder="Expected Quantity (optional)"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm mb-2 text-gray-600" htmlFor="preferred_contact">
+                            Preferred Contact
+                        </label>
+                        <select
+                            id="preferred_contact"
+                            value={formData.preferred_contact}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-2 rounded-md bg-gray-50 text-gray-800 border border-gray-200 transition focus:outline-none"
+                        >
+                            <option value="">No preference</option>
+                            <option value="email">Email</option>
+                            <option value="phone">Phone</option>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="wechat">WeChat</option>
+                        </select>
+                    </div>
+                    <div>
                         <label className="block text-sm mb-2 text-gray-600" htmlFor="message">
                             Message <span className="text-red-500">*</span>
                         </label>
@@ -157,6 +273,7 @@ const InquiryForm = () => {
                             required
                         ></textarea>
                     </div>
+
                     <button
                         type="submit"
                         disabled={loading}

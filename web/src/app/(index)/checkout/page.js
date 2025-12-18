@@ -19,6 +19,36 @@ export default function Page() {
   const [result, setResult] = useState(null);
   const [err, setErr] = useState('');
 
+  const TrustPanel = ({ variant = 'checkout' }) => {
+    return (
+      <div className="mt-6 rounded-md border bg-gray-50 p-4 text-sm">
+        <div className="font-semibold text-gray-900">Secure checkout</div>
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-3 text-gray-600">
+          <div>
+            <div className="font-medium text-gray-800">Payments</div>
+            <div className="text-xs">Stripe / PayPal supported</div>
+          </div>
+          <div>
+            <div className="font-medium text-gray-800">Support</div>
+            <div className="text-xs">
+              Questions? <Link href="/#inquiry" className="text-blue-600 hover:underline">Send an inquiry</Link>
+            </div>
+          </div>
+          <div>
+            <div className="font-medium text-gray-800">Order tracking</div>
+            <div className="text-xs">Use order no + token to query anytime</div>
+          </div>
+        </div>
+
+        {variant === 'after' ? (
+          <div className="mt-4 text-xs text-gray-500">
+            Tip: If you prefer, you can pay later. Your order is saved and can be queried using the token.
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
   useEffect(() => {
     setItems(readCart());
   }, []);
@@ -50,6 +80,34 @@ export default function Page() {
   }, [items]);
 
   const total = useMemo(() => subtotal + Number(shippingFee || 0), [subtotal, shippingFee]);
+
+  const copyText = async (text) => {
+    try {
+      if (!text) return;
+      await navigator.clipboard.writeText(String(text));
+    } catch (e) {
+      try {
+        const el = document.createElement('textarea');
+        el.value = String(text);
+        el.setAttribute('readonly', '');
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      } catch (e2) {
+      }
+    }
+  };
+
+  const inquiryHref = useMemo(() => {
+    if (!result?.orderNo && !result?.token) return '/#inquiry';
+    const params = new URLSearchParams();
+    if (result?.orderNo) params.set('inquiryOrderNo', String(result.orderNo));
+    if (result?.token) params.set('inquiryToken', String(result.token));
+    return `/?${params.toString()}#inquiry`;
+  }, [result?.orderNo, result?.token]);
 
   const createOrder = async () => {
     setErr('');
@@ -195,12 +253,29 @@ export default function Page() {
           <div className="mt-3 text-xs text-gray-500">
             After creating the order, you will get an order number and token for order tracking.
           </div>
+
+          <TrustPanel />
         </div>
       ) : (
         <div className="mt-6 bg-white border rounded-md p-6">
           <div className="text-lg font-semibold">Order created</div>
           <div className="mt-3 text-sm text-gray-600">Order No: <span className="font-mono text-gray-900">{result.orderNo}</span></div>
           <div className="mt-1 text-sm text-gray-600">Query Token: <span className="font-mono text-gray-900">{result.token}</span></div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button className="rounded-md px-3 py-1.5 text-sm border border-gray-300 hover:bg-gray-50" onClick={() => copyText(result.orderNo)}>Copy order no</button>
+            <button className="rounded-md px-3 py-1.5 text-sm border border-gray-300 hover:bg-gray-50" onClick={() => copyText(result.token)}>Copy token</button>
+            <button
+              className="rounded-md px-3 py-1.5 text-sm border border-gray-300 hover:bg-gray-50"
+              onClick={() => copyText(`Order No: ${result.orderNo}\nToken: ${result.token}`)}
+            >
+              Copy both
+            </button>
+          </div>
+
+          <div className="mt-4 text-sm text-gray-600">
+            Need help? <Link href={inquiryHref} className="text-blue-600 hover:underline">Contact us</Link>
+          </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {shopSettings.enableStripe ? (
@@ -214,6 +289,8 @@ export default function Page() {
               <button className="rounded-md px-4 py-2 bg-gray-200 text-gray-500" disabled>PayPal disabled</button>
             )}
           </div>
+
+          <TrustPanel variant="after" />
 
           <div className="mt-6 text-sm">
             <Link href={`/order/query`} className="text-blue-600 hover:underline">Go to order query</Link>

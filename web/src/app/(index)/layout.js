@@ -4,6 +4,7 @@ import {Roboto, Open_Sans, Lato, Nunito, Merriweather, Montserrat } from 'next/f
 import "@/styles/globals.css";
 import api from "@/utils/axiosApi";
 import ThemeScript from '@/components/index/sections/ThemeScript';
+import { cookies } from 'next/headers';
 
 export const revalidate = 0
 
@@ -51,6 +52,13 @@ const getInitialThemeStyles = (templateId) => {
 export default async function RootLayout({children}) {
     const sectionData = (await getSectionData()) || { navSectionData: null, footerSectionData: null };
     const {navSectionData, footerSectionData, homeThemeId} = sectionData;
+
+    let lang = 'en';
+    try {
+        const v = cookies().get('lang')?.value;
+        if (v) lang = decodeURIComponent(v);
+    } catch (e) {
+    }
     
     // 获取模板id（优先使用后台设置）
     const templateId = homeThemeId || process.env.NEXT_PUBLIC_TEMPLATE_ID || '001';
@@ -71,7 +79,7 @@ export default async function RootLayout({children}) {
     // 如果网站状态为关闭
     if (isWebsiteDown) {
         return (
-            <html lang="en" suppressHydrationWarning>
+            <html lang={lang || 'en'} suppressHydrationWarning>
                 <head>
                     <title>Website Under Maintenance</title>
                     {/* 内联样式优先设置主题变量 */}
@@ -116,7 +124,7 @@ export default async function RootLayout({children}) {
     }
     
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html lang={lang || 'en'} suppressHydrationWarning>
             <head>
                 {/* 内联样式优先设置主题变量 */}
                 <style dangerouslySetInnerHTML={{ __html: getInitialThemeStyles(templateId) }} />

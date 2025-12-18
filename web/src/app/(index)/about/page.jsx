@@ -50,11 +50,15 @@ export async function generateMetadata({params}) {
     const {seo_title, seo_description, seo_keywords} = data.seoData;
     const siteName = data.siteName || '';
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const canonical = base ? `${base}/about` : undefined;
+
     // 返回动态生成的metadata
     return {
         title: seo_title || ('About Us - ' + siteName),
         description: seo_description || ('About Us - ' + siteName),
         keywords: seo_keywords || ('About Us - ' + siteName),
+        ...(canonical ? { alternates: { canonical } } : {}),
         // Open Graph
         openGraph: {
             title: seo_title || 'About Us',

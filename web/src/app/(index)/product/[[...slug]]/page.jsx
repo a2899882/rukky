@@ -76,11 +76,29 @@ export async function generateMetadata({params}) {
     const {seo_title, seo_description, seo_keywords} = data.seoData;
     const siteName = data.siteName;
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const slug = params?.slug || [];
+    let path = '/product';
+    if (Array.isArray(slug) && slug.length > 0) {
+        if (slug[0] === 'category' && slug.length >= 2) {
+            path = `/product/category/${slug[1]}`;
+            if (slug.length >= 4 && slug[2] === 'page') {
+                const n = parseInt(slug[3], 10) || 1;
+                if (n > 1) path = `/product/category/${slug[1]}/page/${n}`;
+            }
+        } else if (slug[0] === 'page' && slug.length >= 2) {
+            const n = parseInt(slug[1], 10) || 1;
+            if (n > 1) path = `/product/page/${n}`;
+        }
+    }
+    const canonical = base ? `${base}${path}` : undefined;
+
     // 返回动态生成的metadata
     return {
         title: seo_title || 'Products',
         description: seo_description || 'Products',
         keywords: seo_keywords || 'Products',
+        ...(canonical ? { alternates: { canonical } } : {}),
         // Open Graph
         openGraph: {
             title: seo_title || 'Products',

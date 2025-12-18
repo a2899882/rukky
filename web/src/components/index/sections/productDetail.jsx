@@ -31,6 +31,49 @@ export default function ProductDetail({detailData, relatedData}) {
         };
     }, [selectedSkuId, skus]);
 
+    const inquiryHref = React.useMemo(() => {
+        const params = new URLSearchParams();
+        try {
+            if (detailData?.title) params.set('inquiryProduct', String(detailData.title));
+            if (detailData?.id != null) params.set('inquiryProductId', String(detailData.id));
+            if (selectedSku?.label) params.set('inquirySku', String(selectedSku.label));
+            if (typeof window !== 'undefined' && window?.location?.href) {
+                params.set('inquiryUrl', window.location.href);
+            }
+        } catch (e) {
+        }
+        const qs = params.toString();
+        return qs ? `/?${qs}#inquiry` : '/#inquiry';
+    }, [detailData?.id, detailData?.title, selectedSku?.label]);
+
+    const TrustPanel = () => {
+        return (
+            <div className="mt-6 rounded-md border bg-gray-50 p-4 text-sm">
+                <div className="font-semibold text-gray-900">Buy with confidence</div>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-600">
+                    <div>
+                        <div className="font-medium text-gray-800">Secure payment</div>
+                        <div className="text-xs">Stripe / PayPal supported</div>
+                    </div>
+                    <div>
+                        <div className="font-medium text-gray-800">Fast support</div>
+                        <div className="text-xs">
+                            Need a quote or bulk pricing? <Link href={inquiryHref} className="text-blue-600 hover:underline">Send an inquiry</Link>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="font-medium text-gray-800">Shipping</div>
+                        <div className="text-xs">We will confirm shipping options after your order</div>
+                    </div>
+                    <div>
+                        <div className="font-medium text-gray-800">Returns</div>
+                        <div className="text-xs">Contact us if you have any issues with your order</div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             {/* 面包屑导航 */}
@@ -129,6 +172,12 @@ export default function ProductDetail({detailData, relatedData}) {
                             }}
                             selectedSku={selectedSku}
                         />
+
+                        <div className="mt-4 text-sm text-gray-600">
+                            Prefer to confirm details first? <Link href={inquiryHref} className="text-blue-600 hover:underline">Send an inquiry</Link>
+                        </div>
+
+                        <TrustPanel />
                     </div>
 
                     {/* 商品分类 */}

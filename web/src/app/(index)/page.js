@@ -67,10 +67,14 @@ export async function generateMetadata() {
     const {seo_title, seo_description, seo_keywords} = data.seoData || {};
     const siteName = data.siteName;
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const canonical = base ? `${base}/` : undefined;
+
     return {
         title: seo_title || siteName || 'Home',
         description: seo_description || siteName || 'Home',
         keywords: seo_keywords || siteName || 'Home',
+        ...(canonical ? { alternates: { canonical } } : {}),
         openGraph: {
             title: seo_title || siteName || 'Home',
             description: seo_description || siteName || 'Home',

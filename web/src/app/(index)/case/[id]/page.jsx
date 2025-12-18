@@ -35,11 +35,15 @@ export async function generateMetadata({params}) {
     // 从详情数据中提取信息
     const {seo_title, seo_description, seo_keywords, title} = data.detailData;
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const canonical = base ? `${base}/case/${id}` : undefined;
+
     // 返回动态生成的metadata
     return {
         title: seo_title || title,
         description: seo_description || title,
         keywords: seo_keywords || title,
+        ...(canonical ? { alternates: { canonical } } : {}),
     };
 }
 
@@ -63,6 +67,35 @@ export default async function Page({params}) {
         recommendData: data.recommendData
     };
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const caseUrl = base ? `${base}/case/${id}` : undefined;
+    const breadcrumbJsonLd = base && caseUrl
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Home',
+                    item: `${base}/`,
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Case',
+                    item: `${base}/case`,
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: data?.detailData?.title || 'Case',
+                    item: caseUrl,
+                },
+            ],
+        }
+        : null;
+
     // 动态导入对应模板（若模板缺失，回退到 010，避免 SSR 白屏）
     let CaseDetailTemplate;
     try {
@@ -73,5 +106,17 @@ export default async function Page({params}) {
         CaseDetailTemplate = CaseDetailTemplateModule.default;
     }
 
-    return <CaseDetailTemplate {...templateProps} />;
+    return (
+        <>
+            {breadcrumbJsonLd ? (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(breadcrumbJsonLd),
+                    }}
+                />
+            ) : null}
+            <CaseDetailTemplate {...templateProps} />
+        </>
+    );
 }

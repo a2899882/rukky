@@ -53,11 +53,16 @@ export async function generateMetadata({params}) {
         seo_keywords = 'News'
     } = seoData || {};
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const canonicalPath = pageNumber > 1 ? `/news/page/${pageNumber}` : '/news';
+    const canonical = base ? `${base}${canonicalPath}` : undefined;
+
 
     return {
         title: seo_title || 'News',
         description: seo_description,
         keywords: seo_keywords,
+        ...(canonical ? { alternates: { canonical } } : {}),
         // Open Graph
         openGraph: {
             title: seo_title || 'News',

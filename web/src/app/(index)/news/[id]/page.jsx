@@ -37,11 +37,15 @@ export async function generateMetadata({params}) {
     const {seo_title, seo_description, seo_keywords, title} = data.detailData;
     const siteName = data.siteName;
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const canonical = base ? `${base}/news/${id}` : undefined;
+
     // 返回动态生成的metadata
     return {
         title: seo_title || title,
         description: seo_description || title,
         keywords: seo_keywords || title,
+        ...(canonical ? { alternates: { canonical } } : {}),
         // Open Graph
         openGraph: {
             title: seo_title || title,
@@ -88,10 +92,38 @@ export default async function Page({params}) {
 
     const {detailData, categoryData, recommendData} = data;
 
+    const base = String(process.env.NEXT_PUBLIC_BASE_URL || '').replace(/\/$/, '');
+    const articleUrl = base ? `${base}/news/${id}` : `${process.env.NEXT_PUBLIC_BASE_URL || ''}/news/${id}`;
+
+    const breadcrumbJsonLd = base && articleUrl
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+                {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Home',
+                    item: `${base}/`,
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'News',
+                    item: `${base}/news`,
+                },
+                {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: detailData?.title || 'News',
+                    item: articleUrl,
+                },
+            ],
+        }
+        : null;
+
     // 分享链接构建
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    const articleUrl = `${baseUrl}/news/${id}`;
-    const encodedUrl = encodeURIComponent(articleUrl);
+    const encodedUrl = encodeURIComponent(articleUrl || '');
     const encodedTitle = encodeURIComponent(detailData.title);
     const encodedSummary = encodeURIComponent(`Check out this article: ${detailData.title}`);
 
@@ -120,5 +152,17 @@ export default async function Page({params}) {
         NewsDetailTemplate = NewsDetailTemplateModule.default;
     }
     
-    return <NewsDetailTemplate {...templateProps} />;
+    return (
+        <>
+            {breadcrumbJsonLd ? (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(breadcrumbJsonLd),
+                    }}
+                />
+            ) : null}
+            <NewsDetailTemplate {...templateProps} />
+        </>
+    );
 }
