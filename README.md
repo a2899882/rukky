@@ -50,8 +50,8 @@ docker-compose -f docker-compose.yml restart api web nginx
 说明：本项目 `web` 在构建阶段（build args）会注入 `NEXT_PUBLIC_BASE_URL` 等变量，所以换域名后需要 `--build web` 才会生效。
 
 ```bash
-NEW_DOMAIN="newdomain.com"
-NEW_BASE_URL="https://newdomain.com"
+NEW_DOMAIN="newdomain.com"      # ← 改这里：填你的域名（不带协议），例如 example.com
+NEW_BASE_URL="https://newdomain.com" # ← 改这里：填你的站点完整地址（带协议），例如 https://example.com
 
 cd /opt/boutiquemark-shop
 
