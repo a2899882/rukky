@@ -8,6 +8,46 @@
 
 演示地址：[https://boutiquemark.shop](https://boutiquemark.shop)
 
+## 快速开始（推荐：Debian/Ubuntu + Docker）
+
+部署文档：`deploy/README_DEPLOY.md`
+
+最常用命令（在服务器 `/opt/boutiquemark-shop` 目录执行）：
+
+```bash
+git pull
+docker-compose -f docker-compose.yml up -d --build api web nginx
+docker-compose -f docker-compose.yml exec api python manage.py migrate
+docker-compose -f docker-compose.yml restart api web nginx
+```
+
+### 一键换域名（不同服务器部署必看）
+
+说明：本项目 `web` 在构建阶段（build args）会注入 `NEXT_PUBLIC_BASE_URL` 等变量，所以换域名后需要 `--build web` 才会生效。
+
+```bash
+NEW_DOMAIN="newdomain.com"
+NEW_BASE_URL="https://newdomain.com"
+
+cd /opt/boutiquemark-shop
+
+set_kv () {
+  KEY="$1"; VAL="$2";
+  grep -q "^${KEY}=" .env && sed -i "s#^${KEY}=.*#${KEY}=${VAL}#g" .env || echo "${KEY}=${VAL}" >> .env
+}
+
+set_kv SITE_HOST "${NEW_DOMAIN}"
+set_kv NEXT_PUBLIC_BASE_URL "${NEW_BASE_URL}"
+set_kv NEXT_PUBLIC_DJANGO_BASE_URL "${NEW_BASE_URL}"
+set_kv PUBLIC_BASE_URL "${NEW_BASE_URL}"
+set_kv DJANGO_BASE_HOST_URL "${NEW_BASE_URL}"
+set_kv DJANGO_ALLOWED_HOSTS "${NEW_DOMAIN},localhost,127.0.0.1"
+
+docker-compose -f docker-compose.yml up -d --build api web nginx
+docker-compose -f docker-compose.yml exec api python manage.py migrate
+docker-compose -f docker-compose.yml restart api web nginx
+```
+
 
 ## 开发环境
 

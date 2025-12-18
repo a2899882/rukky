@@ -2,7 +2,7 @@
 
 ## 1. 服务器准备
 
-- 推荐路径：`/opt/boutiquemark`
+- 推荐路径：`/opt/boutiquemark-shop`
 - 需要开放端口：80（后续上 https 再开 443）
 
 ### 安装 Docker（只需一次）
@@ -13,7 +13,7 @@ sudo bash deploy/server-install-docker.sh
 
 ## 2. 获取代码
 
-把你的私有仓库代码放到 `/opt/boutiquemark`。
+把代码放到 `/opt/boutiquemark-shop`。
 
 - 方式 1：git clone（推荐）
 - 方式 2：上传 zip，服务器解压
@@ -31,6 +31,13 @@ nano .env
 - `DJANGO_ALLOWED_HOSTS=boutiquemark.shop,www.boutiquemark.shop,localhost,127.0.0.1`
 - `DJANGO_SECRET_KEY=...`
 - `MYSQL_ROOT_PASSWORD=...`
+
+域名/SEO 相关（建议保持一致）：
+
+- `NEXT_PUBLIC_BASE_URL=https://你的域名`（canonical/JSON-LD/分享链接/图片绝对路径）
+- `NEXT_PUBLIC_DJANGO_BASE_URL=https://你的域名`（前端 SSR/接口 base）
+- `PUBLIC_BASE_URL=https://你的域名`（后端生成 URL、支付回跳等）
+- `DJANGO_BASE_HOST_URL=https://你的域名`
 
 后台管理员初始化（首次部署建议启用）：
 
@@ -65,6 +72,14 @@ nano .env
 
 ```bash
 bash deploy/deploy.sh
+```
+
+如果你希望手动启动（方便排查），使用下面命令（服务名固定为：`db/api/web/nginx`）：
+
+```bash
+docker-compose -f docker-compose.yml up -d --build db api web nginx
+docker-compose -f docker-compose.yml exec api python manage.py migrate
+docker-compose -f docker-compose.yml restart api web nginx
 ```
 
 可选：临时指定本次部署域名（不修改 .env）：
@@ -127,6 +142,33 @@ docker compose logs -f --tail=200 nginx # 或 docker-compose logs -f --tail=200 
 
 - `PUBLIC_BASE_URL` 必须是 `https://你的域名`（用于支付成功/取消回跳）
 - Stripe / PayPal 在切换到 live 前，务必在各自后台检查 Webhook/Return URL 配置与域名一致
+
+## 8. 换服务器/换域名（一条命令）
+
+说明：本项目 `web` 在构建阶段（build args）会注入 `NEXT_PUBLIC_BASE_URL` 等变量，所以换域名后需要 `--build web` 才会生效。
+
+```bash
+NEW_DOMAIN="newdomain.com"
+NEW_BASE_URL="https://newdomain.com"
+
+cd /opt/boutiquemark-shop
+
+set_kv () {
+  KEY="$1"; VAL="$2";
+  grep -q "^${KEY}=" .env && sed -i "s#^${KEY}=.*#${KEY}=${VAL}#g" .env || echo "${KEY}=${VAL}" >> .env
+}
+
+set_kv SITE_HOST "${NEW_DOMAIN}"
+set_kv NEXT_PUBLIC_BASE_URL "${NEW_BASE_URL}"
+set_kv NEXT_PUBLIC_DJANGO_BASE_URL "${NEW_BASE_URL}"
+set_kv PUBLIC_BASE_URL "${NEW_BASE_URL}"
+set_kv DJANGO_BASE_HOST_URL "${NEW_BASE_URL}"
+set_kv DJANGO_ALLOWED_HOSTS "${NEW_DOMAIN},localhost,127.0.0.1"
+
+docker-compose -f docker-compose.yml up -d --build api web nginx
+docker-compose -f docker-compose.yml exec api python manage.py migrate
+docker-compose -f docker-compose.yml restart api web nginx
+```
 
 ## 5. 查看日志
 
