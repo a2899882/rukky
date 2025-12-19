@@ -19,6 +19,9 @@ ENV NEXT_PUBLIC_HOST=$NEXT_PUBLIC_HOST \
     NEXT_PUBLIC_TEMPLATE_ID=$NEXT_PUBLIC_TEMPLATE_ID \
     NEXT_PUBLIC_ADMIN_BASE_PATH=$NEXT_PUBLIC_ADMIN_BASE_PATH
 
+# Increase Node.js heap during build to avoid OOM on small servers
+ENV NODE_OPTIONS=--max-old-space-size=4096
+
 RUN npm run build
 
 FROM node:18-bullseye-slim AS runner
